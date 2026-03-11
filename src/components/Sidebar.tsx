@@ -1,0 +1,92 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { BIBLE_BOOKS, BookInfo } from '@/lib/bible-books';
+
+export default function Sidebar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [expandedBook, setExpandedBook] = useState<number | null>(null);
+
+  const otBooks = BIBLE_BOOKS.filter(b => b.testament === 'OT');
+  const ntBooks = BIBLE_BOOKS.filter(b => b.testament === 'NT');
+
+  const toggleBook = (id: number) => {
+    setExpandedBook(expandedBook === id ? null : id);
+  };
+
+  const renderBook = (book: BookInfo) => (
+    <div key={book.id}>
+      <button
+        onClick={() => toggleBook(book.id)}
+        className="w-full text-left px-3 py-1.5 text-sm hover:bg-parchment-800 rounded transition-colors flex justify-between items-center text-parchment-200"
+      >
+        <span>{book.name}</span>
+        <span className="text-xs text-parchment-500">{book.chapters}</span>
+      </button>
+      {expandedBook === book.id && (
+        <div className="grid grid-cols-5 gap-1 px-3 py-2">
+          {Array.from({ length: book.chapters }, (_, i) => i + 1).map(ch => (
+            <Link
+              key={ch}
+              href={`/reader/${book.name.toLowerCase().replace(/ /g, '-')}/${ch}`}
+              className="text-center text-xs py-1 rounded bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              {ch}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <>
+      {/* Mobile toggle */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed top-4 left-4 z-50 lg:hidden bg-parchment-800 text-gold-400 p-2 rounded-lg shadow-lg"
+        aria-label="Toggle navigation"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+
+      {/* Overlay */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={() => setIsOpen(false)} />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`fixed lg:sticky top-0 left-0 h-screen w-72 bg-parchment-900 border-r border-parchment-800 overflow-y-auto z-40 transform transition-transform lg:transform-none ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+        <div className="p-4 border-b border-parchment-800">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="text-2xl">📖</span>
+            <h1 className="text-xl font-bold text-gold-400 font-serif">BibleLens</h1>
+          </Link>
+          <p className="text-xs text-parchment-500 mt-1">Analytical Bible Study</p>
+        </div>
+
+        <nav className="p-2">
+          <div className="flex gap-2 mb-3 px-2">
+            <Link href="/search" className="flex-1 text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              🔍 Search
+            </Link>
+            <Link href="/compare" className="flex-1 text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              ⚖️ Compare
+            </Link>
+          </div>
+
+          <div className="mb-2">
+            <h3 className="text-xs font-semibold text-gold-500 uppercase tracking-wider px-3 py-2">Old Testament</h3>
+            {otBooks.map(renderBook)}
+          </div>
+          <div className="mt-4">
+            <h3 className="text-xs font-semibold text-gold-500 uppercase tracking-wider px-3 py-2">New Testament</h3>
+            {ntBooks.map(renderBook)}
+          </div>
+        </nav>
+      </aside>
+    </>
+  );
+}

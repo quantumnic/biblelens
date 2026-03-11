@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+:root {
+  --bg-primary: #1a1208;
+  --bg-secondary: #2d2010;
+  --bg-card: #3a2a18;
+  --text-primary: #f5e6d0;
+  --text-secondary: #d4b07a;
+  --gold: #d4a853;
+  --gold-dim: #8a6230;
+  --border: #4a351a;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.bible-text {
+  font-family: 'Playfair Display', Georgia, serif;
+  line-height: 1.8;
+  font-size: 1.1rem;
+}
+
+.verse-number {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--gold);
+  vertical-align: super;
+  margin-right: 2px;
+}
+
+.strongs-word {
+  text-decoration: underline;
+  text-decoration-color: var(--gold-dim);
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.strongs-word:hover {
+  text-decoration-color: var(--gold);
+  color: var(--gold);
+}
+
+.diff-highlight {
+  background-color: rgba(212, 168, 83, 0.2);
+  border-bottom: 2px solid var(--gold);
+  padding: 0 2px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+/* Selection */
+::selection {
+  background-color: rgba(212, 168, 83, 0.3);
+  color: var(--text-primary);
+}
