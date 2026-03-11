@@ -46,6 +46,31 @@ export default function ReaderPage({ params, searchParams }: Props) {
     strongsWords[key].push(w);
   }
 
+  // Load Latin word provenance for VUL hover
+  const latinWords: Record<string, any[]> = {};
+  if (selectedTranslations.includes('VUL')) {
+    const allLatinProv = db.prepare(
+      `SELECT * FROM word_provenance WHERE language = 'latin'`
+    ).all() as any[];
+
+    for (const prov of allLatinProv) {
+      const lemma = prov.lemma.toLowerCase();
+      // Build chain for each word
+      const chain: any[] = [prov];
+      let current = prov;
+      while (current?.parent_word_id) {
+        const parent = db.prepare('SELECT * FROM word_provenance WHERE id = ?').get(current.parent_word_id) as any;
+        if (parent) { chain.push(parent); current = parent; } else break;
+      }
+      latinWords[lemma] = [{ ...prov, chain }];
+      // Also index by word (may differ from lemma)
+      const word = prov.word.toLowerCase();
+      if (word !== lemma && !latinWords[word]) {
+        latinWords[word] = [{ ...prov, chain }];
+      }
+    }
+  }
+
   // Available translations
   const allTranslations = db.prepare(
     'SELECT DISTINCT translation FROM verses ORDER BY translation'
@@ -110,6 +135,7 @@ export default function ReaderPage({ params, searchParams }: Props) {
           verses={verses}
           translations={selectedTranslations}
           strongsWords={strongsWords}
+          latinWords={latinWords}
         />
 
         {/* Navigation */}

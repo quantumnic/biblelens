@@ -69,7 +69,11 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
             <Link href="/compare?book=43&chapter=3&verse=16" className="p-5 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all">
               <h3 className="text-lg font-semibold text-gold-400 mb-1">⚖️ Compare Translations</h3>
-              <p className="text-sm text-parchment-400">Side-by-side translation comparison with diff highlighting</p>
+              <p className="text-sm text-parchment-400">Side-by-side comparison including Latin Vulgate with diff highlighting</p>
+            </Link>
+            <Link href="/latin/amor" className="p-5 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all">
+              <h3 className="text-lg font-semibold text-gold-400 mb-1">📜 Latin Vulgate</h3>
+              <p className="text-sm text-parchment-400">Full Latin vocabulary with etymology chains, manuscripts &amp; academic references</p>
             </Link>
             <Link href="/analytics" className="p-5 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all">
               <h3 className="text-lg font-semibold text-gold-400 mb-1">📊 Analytics Dashboard</h3>
@@ -77,17 +81,21 @@ export default function Home() {
             </Link>
             <Link href="/word/G26" className="p-5 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all">
               <h3 className="text-lg font-semibold text-gold-400 mb-1">📖 Strong&apos;s Concordance</h3>
-              <p className="text-sm text-parchment-400">Original Hebrew &amp; Greek with definitions and occurrences</p>
+              <p className="text-sm text-parchment-400">Hebrew &amp; Greek with translation chains to Latin</p>
+            </Link>
+            <Link href="/word/hebrew/ahavah" className="p-5 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all">
+              <h3 className="text-lg font-semibold text-gold-400 mb-1">🕎 Word Provenance</h3>
+              <p className="text-sm text-parchment-400">Complete word history: Proto-Semitic → Hebrew → Greek → Latin → English</p>
             </Link>
             <Link href="/search?q=love" className="p-5 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all">
               <h3 className="text-lg font-semibold text-gold-400 mb-1">🔍 Full-Text Search</h3>
-              <p className="text-sm text-parchment-400">Search across all translations with filters</p>
+              <p className="text-sm text-parchment-400">Search across all translations including Vulgate</p>
             </Link>
           </div>
 
           {/* Stats */}
           <div className="text-center text-parchment-600 text-xs">
-            <p>4 translations · 31,102+ verses each · 340,000+ cross-references · 50 Strong&apos;s entries</p>
+            <p>5 translations (incl. Latin Vulgate) · 155,000+ verses · 430,000+ cross-references · 106 word provenance entries</p>
             <p className="mt-1">Built with Next.js · SQLite · Open Source</p>
           </div>
         </div>

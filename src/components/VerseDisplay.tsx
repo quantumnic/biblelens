@@ -7,6 +7,7 @@ import CrossRefPanel from './CrossRefPanel';
 import StrongsPanel from './StrongsPanel';
 import ResearchPanel from './ResearchPanel';
 import ManuscriptPanel from './ManuscriptPanel';
+import WordDNA from './WordDNA';
 
 interface Verse {
   book: number;
@@ -26,13 +27,24 @@ interface WordStrongs {
   language: string;
 }
 
+interface LatinWordProv {
+  word: string;
+  lemma: string;
+  id: number;
+  language: string;
+  definition: string;
+  parent_word_id: number | null;
+  chain?: any[];
+}
+
 interface Props {
   verses: Verse[];
   translations: string[];
-  strongsWords?: Record<string, WordStrongs[]>; // keyed by "book-chapter-verse"
+  strongsWords?: Record<string, WordStrongs[]>;
+  latinWords?: Record<string, LatinWordProv[]>; // keyed by lemma
 }
 
-export default function VerseDisplay({ verses, translations, strongsWords }: Props) {
+export default function VerseDisplay({ verses, translations, strongsWords, latinWords }: Props) {
   const [selectedVerse, setSelectedVerse] = useState<{ book: number; chapter: number; verse: number } | null>(null);
   const [showPanel, setShowPanel] = useState<'crossref' | 'strongs' | 'research' | 'manuscripts' | null>(null);
   const [selectedStrongs, setSelectedStrongs] = useState<string | null>(null);
@@ -61,11 +73,30 @@ export default function VerseDisplay({ verses, translations, strongsWords }: Pro
 
   const renderVerseText = (v: Verse) => {
     const key = `${v.book}-${v.chapter}-${v.verse}`;
+
+    // For VUL verses with latin word data, render with WordDNA popups
+    if (v.translation === 'VUL' && latinWords) {
+      return v.text.split(/(\s+)/).map((token, i) => {
+        const clean = token.toLowerCase().replace(/[^a-zàáâãäåèéêëìíîïòóôõöùúûüý]/g, '');
+        const lw = latinWords[clean];
+        if (lw && lw.length > 0) {
+          const prov = lw[0];
+          return (
+            <WordDNA
+              key={i}
+              word={token}
+              provenance={prov}
+              chain={prov.chain}
+            />
+          );
+        }
+        return token;
+      });
+    }
+
     const words = strongsWords?.[key];
-    
     if (!words || words.length === 0) return v.text;
     
-    // Build a map of word positions to Strong's data
     const wordMap = new Map(words.map(w => [w.word.toLowerCase(), w]));
     
     return v.text.split(/(\s+)/).map((token, i) => {

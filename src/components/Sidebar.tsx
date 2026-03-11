@@ -68,12 +68,18 @@ export default function Sidebar() {
         </div>
 
         <nav className="p-2">
-          <div className="flex gap-2 mb-3 px-2">
-            <Link href="/search" className="flex-1 text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+          <div className="grid grid-cols-2 gap-2 mb-3 px-2">
+            <Link href="/search" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
               🔍 Search
             </Link>
-            <Link href="/compare" className="flex-1 text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+            <Link href="/compare" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
               ⚖️ Compare
+            </Link>
+            <Link href="/latin/amor" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              📜 Latin
+            </Link>
+            <Link href="/word/G26" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              📖 Strong&apos;s
             </Link>
           </div>
 

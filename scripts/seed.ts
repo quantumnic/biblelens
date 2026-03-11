@@ -5,10 +5,8 @@ import fs from 'fs';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DB_PATH = path.join(DATA_DIR, 'bible.db');
-
 const BASE_URL = 'https://raw.githubusercontent.com/scrollmapper/bible_databases/master/formats';
 
-// Bible book name to ID mapping
 const BOOK_MAP: Record<string, number> = {
   'Genesis':1,'Exodus':2,'Leviticus':3,'Numbers':4,'Deuteronomy':5,
   'Joshua':6,'Judges':7,'Ruth':8,
@@ -20,8 +18,7 @@ const BOOK_MAP: Record<string, number> = {
   'Isaiah':23,'Jeremiah':24,'Lamentations':25,'Ezekiel':26,'Daniel':27,
   'Hosea':28,'Joel':29,'Amos':30,'Obadiah':31,'Jonah':32,'Micah':33,
   'Nahum':34,'Habakkuk':35,'Zephaniah':36,'Haggai':37,'Zechariah':38,'Malachi':39,
-  'Matthew':40,'Mark':41,'Luke':42,'John':43,'Acts':44,
-  'Romans':45,
+  'Matthew':40,'Mark':41,'Luke':42,'John':43,'Acts':44,'Romans':45,
   '1 Corinthians':46,'I Corinthians':46,'2 Corinthians':47,'II Corinthians':47,
   'Galatians':48,'Ephesians':49,'Philippians':50,'Colossians':51,
   '1 Thessalonians':52,'I Thessalonians':52,'2 Thessalonians':53,'II Thessalonians':53,
@@ -34,13 +31,7 @@ const BOOK_MAP: Record<string, number> = {
 
 interface ScrollmapperBible {
   translation: string;
-  books: {
-    name: string;
-    chapters: {
-      chapter: number;
-      verses: { verse: number; text: string }[];
-    }[];
-  }[];
+  books: { name: string; chapters: { chapter: number; verses: { verse: number; text: string }[] }[] }[];
 }
 
 async function downloadBible(filename: string): Promise<ScrollmapperBible> {
@@ -71,6 +62,7 @@ async function main() {
   const db = new Database(DB_PATH);
   db.pragma('journal_mode = WAL');
 
+  // ── Schema ──────────────────────────────────────────────────
   db.exec(`
     CREATE TABLE IF NOT EXISTS verses (
       id INTEGER PRIMARY KEY,
@@ -120,10 +112,60 @@ async function main() {
     CREATE INDEX idx_word_strongs_id ON word_strongs(strongs_id);
 
     CREATE VIRTUAL TABLE IF NOT EXISTS verses_fts USING fts5(text, content=verses, content_rowid=id);
+
+    -- Word Provenance: full etymology chain across languages
+    CREATE TABLE IF NOT EXISTS word_provenance (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      word TEXT NOT NULL,
+      language TEXT NOT NULL,
+      lemma TEXT NOT NULL,
+      definition TEXT NOT NULL,
+      etymology TEXT,
+      proto_root TEXT,
+      first_occurrence TEXT,
+      parent_word_id INTEGER,
+      manuscript_sources TEXT,
+      textual_variants TEXT,
+      academic_refs TEXT,
+      logeion_url TEXT,
+      perseus_url TEXT,
+      part_of_speech TEXT,
+      FOREIGN KEY (parent_word_id) REFERENCES word_provenance(id)
+    );
+    CREATE INDEX idx_provenance_lemma ON word_provenance(lemma);
+    CREATE INDEX idx_provenance_language ON word_provenance(language);
+    CREATE INDEX idx_provenance_word ON word_provenance(word);
+    CREATE INDEX idx_provenance_parent ON word_provenance(parent_word_id);
+
+    -- Latin words (quick lookup for Vulgata reader)
+    CREATE TABLE IF NOT EXISTS latin_words (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      word TEXT NOT NULL UNIQUE,
+      lemma TEXT,
+      definition TEXT,
+      part_of_speech TEXT,
+      etymology TEXT,
+      occurrences INTEGER DEFAULT 0,
+      provenance_id INTEGER,
+      FOREIGN KEY (provenance_id) REFERENCES word_provenance(id)
+    );
+    CREATE INDEX idx_latin_words_lemma ON latin_words(lemma);
+
+    -- Verse-level latin word positions
+    CREATE TABLE IF NOT EXISTS verse_latin_words (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      verse_id INTEGER,
+      word TEXT,
+      position INTEGER,
+      lemma TEXT
+    );
+    CREATE INDEX idx_vlw_verse ON verse_latin_words(verse_id);
+    CREATE INDEX idx_vlw_word ON verse_latin_words(word);
   `);
 
+  // ── Load Bible Translations ─────────────────────────────────
   const insertVerse = db.prepare('INSERT INTO verses (id, book, chapter, verse, text, translation) VALUES (?, ?, ?, ?, ?, ?)');
-  
+
   const insertBible = db.transaction((verses: { book: number; chapter: number; verse: number; text: string }[], translation: string, idOffset: number) => {
     for (const v of verses) {
       const id = idOffset + v.book * 1000000 + v.chapter * 1000 + v.verse;
@@ -131,12 +173,12 @@ async function main() {
     }
   });
 
-  // Download and load translations
   const translations: { file: string; name: string; offset: number }[] = [
     { file: 'KJV.json', name: 'KJV', offset: 0 },
     { file: 'ASV.json', name: 'ASV', offset: 100000000 },
     { file: 'BBE.json', name: 'WEB', offset: 200000000 },
     { file: 'YLT.json', name: 'YLT', offset: 300000000 },
+    { file: 'Vulgate.json', name: 'VUL', offset: 400000000 },
   ];
 
   for (const t of translations) {
@@ -156,119 +198,95 @@ async function main() {
   console.log('Building full-text search index...');
   db.exec(`INSERT INTO verses_fts(rowid, text) SELECT id, text FROM verses`);
 
-  // Cross-references from SQL (parse the SQL files)
+  // ── Cross-references ────────────────────────────────────────
   console.log('Loading cross-references...');
-  // Download the SQLite cross_references DB directly
   try {
-    const xrefSqlUrl = `${BASE_URL}/sql/extras/cross_references_0.sql`;
-    console.log(`  Downloading cross-references SQL...`);
-    const { data: sqlText } = await axios.get(xrefSqlUrl, { responseType: 'text' });
-    
-    const insertXref = db.prepare(`INSERT INTO cross_references 
-      (from_book, from_chapter, from_verse_start, from_verse_end, to_book, to_chapter, to_verse_start, to_verse_end, votes) 
+    const insertXref = db.prepare(`INSERT INTO cross_references
+      (from_book, from_chapter, from_verse_start, from_verse_end, to_book, to_chapter, to_verse_start, to_verse_end, votes)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
-    
+
     let xrefCount = 0;
-    
-    // Format: VALUES ('Genesis', 1, 1, 'Proverbs', 8, 22, 22, 59);
     const parseXrefSql = (sql: string): number => {
       let count = 0;
       const regex = /VALUES\s*\('([^']+)',\s*(\d+),\s*(\d+),\s*'([^']+)',\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\)/gi;
       let match;
       while ((match = regex.exec(sql)) !== null) {
-        const fbName = match[1];
-        const fc = parseInt(match[2]);
-        const fv = parseInt(match[3]);
-        const tbName = match[4];
-        const tc = parseInt(match[5]);
-        const tvs = parseInt(match[6]);
-        const tve = parseInt(match[7]);
-        const votes = parseInt(match[8]);
-        
-        const fb = BOOK_MAP[fbName];
-        const tb = BOOK_MAP[tbName];
-        if (fb && tb && fc && fv && tc && tvs) {
-          insertXref.run(fb, fc, fv, fv, tb, tc, tvs, tve || tvs, votes || 0);
+        const fb = BOOK_MAP[match[1]], tb = BOOK_MAP[match[4]];
+        if (fb && tb) {
+          insertXref.run(fb, parseInt(match[2]), parseInt(match[3]), parseInt(match[3]),
+            tb, parseInt(match[5]), parseInt(match[6]), parseInt(match[7]) || parseInt(match[6]), parseInt(match[8]) || 0);
           count++;
         }
       }
       return count;
     };
-    
-    const batchInsert = db.transaction((sql: string) => {
-      return parseXrefSql(sql);
-    });
-    
-    xrefCount += batchInsert(sqlText);
-    console.log(`  Loaded ${xrefCount} cross-references from file 0.`);
-    
-    for (let i = 1; i <= 6; i++) {
+    const batchInsert = db.transaction((sql: string) => parseXrefSql(sql));
+
+    for (let i = 0; i <= 6; i++) {
       try {
-        const { data: moreSql } = await axios.get(`${BASE_URL}/sql/extras/cross_references_${i}.sql`, { responseType: 'text' });
-        const moreCount = batchInsert(moreSql);
-        xrefCount += moreCount;
-        console.log(`  Loaded ${moreCount} cross-references from file ${i}. Total: ${xrefCount}`);
-      } catch {
-        console.log(`  Cross-references file ${i} not found or failed.`);
-      }
+        const { data: sqlText } = await axios.get(`${BASE_URL}/sql/extras/cross_references_${i}.sql`, { responseType: 'text' });
+        const c = batchInsert(sqlText);
+        xrefCount += c;
+        console.log(`  Loaded ${c} cross-references from file ${i}. Total: ${xrefCount}`);
+      } catch { console.log(`  Cross-references file ${i} not found.`); }
     }
   } catch (e: any) {
     console.log(`  Cross-references loading failed: ${e.message}`);
   }
 
-  // Strong's concordance demo
-  console.log('Seeding Strong\'s concordance demo...');
+  // ── Strong's Concordance ────────────────────────────────────
+  console.log("Seeding Strong's concordance...");
   const strongsData = [
-    { id: 'H430', original: 'אֱלֹהִים', transliteration: 'Elohim', definition: 'God, gods, judges, angels — the supreme God; occasionally applied by way of deference to magistrates', language: 'hebrew' },
-    { id: 'H3068', original: 'יְהוָה', transliteration: 'YHWH / Yahweh', definition: 'The proper name of the God of Israel, the self-Existent or Eternal; Jehovah', language: 'hebrew' },
-    { id: 'H1254', original: 'בָּרָא', transliteration: 'bara', definition: 'To create, shape, form — always with God as subject; to bring into existence', language: 'hebrew' },
+    { id: 'H430', original: 'אֱלֹהִים', transliteration: 'Elohim', definition: 'God, gods, judges, angels — the supreme God', language: 'hebrew' },
+    { id: 'H3068', original: 'יְהוָה', transliteration: 'YHWH / Yahweh', definition: 'The proper name of the God of Israel, the self-Existent or Eternal', language: 'hebrew' },
+    { id: 'H1254', original: 'בָּרָא', transliteration: 'bara', definition: 'To create, shape, form — always with God as subject', language: 'hebrew' },
     { id: 'H776', original: 'אֶרֶץ', transliteration: 'erets', definition: 'Earth, land, ground, country, territory', language: 'hebrew' },
     { id: 'H8064', original: 'שָׁמַיִם', transliteration: 'shamayim', definition: 'Heaven, heavens, sky — the visible heavens, the abode of God', language: 'hebrew' },
     { id: 'H1', original: 'אָב', transliteration: 'ab', definition: 'Father, chief, principal, ancestor, originator', language: 'hebrew' },
     { id: 'H157', original: 'אָהַב', transliteration: 'ahab', definition: 'To love, to be a friend; human love for another, love of God', language: 'hebrew' },
-    { id: 'H1285', original: 'בְּרִית', transliteration: 'berith', definition: 'Covenant, alliance, pledge — a compact made between God and man', language: 'hebrew' },
+    { id: 'H1285', original: 'בְּרִית', transliteration: 'berith', definition: 'Covenant, alliance, pledge', language: 'hebrew' },
     { id: 'H2617', original: 'חֶסֶד', transliteration: 'chesed', definition: 'Lovingkindness, mercy, goodness, faithfulness — covenant loyalty', language: 'hebrew' },
     { id: 'H3444', original: 'יְשׁוּעָה', transliteration: 'yeshuah', definition: 'Salvation, deliverance, rescue, safety, welfare', language: 'hebrew' },
-    { id: 'H4899', original: 'מָשִׁיחַ', transliteration: 'mashiach', definition: 'Anointed, Messiah — the anointed one, a consecrated person', language: 'hebrew' },
-    { id: 'H7307', original: 'רוּחַ', transliteration: 'ruach', definition: 'Wind, breath, mind, spirit — the Spirit of God, the human spirit', language: 'hebrew' },
-    { id: 'H7965', original: 'שָׁלוֹם', transliteration: 'shalom', definition: 'Peace, completeness, welfare, soundness — wholeness, harmony', language: 'hebrew' },
-    { id: 'H8451', original: 'תּוֹרָה', transliteration: 'torah', definition: 'Law, direction, instruction — especially the Mosaic Law', language: 'hebrew' },
-    { id: 'H6662', original: 'צַדִּיק', transliteration: 'tsaddiq', definition: 'Just, righteous, correct — ethically upright', language: 'hebrew' },
-    { id: 'H539', original: 'אָמַן', transliteration: 'aman', definition: 'To believe, to be faithful, confirmed, reliable', language: 'hebrew' },
-    { id: 'H1984', original: 'הָלַל', transliteration: 'halal', definition: 'To praise, shine, boast, celebrate — Hallelujah derives from this', language: 'hebrew' },
-    { id: 'H5315', original: 'נֶפֶשׁ', transliteration: 'nephesh', definition: 'Soul, self, life, creature, person, desire', language: 'hebrew' },
-    { id: 'H3820', original: 'לֵב', transliteration: 'leb', definition: 'Heart, mind, inner person — seat of emotions, will, intellect', language: 'hebrew' },
-    { id: 'H1697', original: 'דָּבָר', transliteration: 'dabar', definition: 'Word, speech, thing, matter — spoken word, divine utterance', language: 'hebrew' },
-    { id: 'H2403', original: 'חַטָּאָה', transliteration: 'chattaah', definition: 'Sin, sin offering — missing the mark', language: 'hebrew' },
+    { id: 'H4899', original: 'מָשִׁיחַ', transliteration: 'mashiach', definition: 'Anointed, Messiah — the anointed one', language: 'hebrew' },
+    { id: 'H7307', original: 'רוּחַ', transliteration: 'ruach', definition: 'Wind, breath, mind, spirit — the Spirit of God', language: 'hebrew' },
+    { id: 'H7965', original: 'שָׁלוֹם', transliteration: 'shalom', definition: 'Peace, completeness, welfare, soundness', language: 'hebrew' },
+    { id: 'H8451', original: 'תּוֹרָה', transliteration: 'torah', definition: 'Law, direction, instruction', language: 'hebrew' },
+    { id: 'H6662', original: 'צַדִּיק', transliteration: 'tsaddiq', definition: 'Just, righteous, correct', language: 'hebrew' },
+    { id: 'H539', original: 'אָמַן', transliteration: 'aman', definition: 'To believe, to be faithful, confirmed', language: 'hebrew' },
+    { id: 'H1984', original: 'הָלַל', transliteration: 'halal', definition: 'To praise, shine, boast, celebrate', language: 'hebrew' },
+    { id: 'H5315', original: 'נֶפֶשׁ', transliteration: 'nephesh', definition: 'Soul, self, life, creature, person', language: 'hebrew' },
+    { id: 'H3820', original: 'לֵב', transliteration: 'leb', definition: 'Heart, mind, inner person', language: 'hebrew' },
+    { id: 'H1697', original: 'דָּבָר', transliteration: 'dabar', definition: 'Word, speech, thing, matter', language: 'hebrew' },
+    { id: 'H2403', original: 'חַטָּאָה', transliteration: 'chattaah', definition: 'Sin, sin offering', language: 'hebrew' },
     { id: 'H3478', original: 'יִשְׂרָאֵל', transliteration: 'Yisrael', definition: 'Israel — he who strives with God', language: 'hebrew' },
-    { id: 'H4428', original: 'מֶלֶךְ', transliteration: 'melek', definition: 'King, royal, ruler — a sovereign monarch', language: 'hebrew' },
+    { id: 'H4428', original: 'מֶלֶךְ', transliteration: 'melek', definition: 'King, royal, ruler', language: 'hebrew' },
     { id: 'H5650', original: 'עֶבֶד', transliteration: 'ebed', definition: 'Servant, slave, worshipper', language: 'hebrew' },
-    { id: 'H5414', original: 'נָתַן', transliteration: 'natan', definition: 'To give, put, set — to bestow, grant', language: 'hebrew' },
+    { id: 'H5414', original: 'נָתַן', transliteration: 'natan', definition: 'To give, put, set', language: 'hebrew' },
     { id: 'G2316', original: 'θεός', transliteration: 'theos', definition: 'God, a deity — the supreme Divinity', language: 'greek' },
     { id: 'G2424', original: 'Ἰησοῦς', transliteration: 'Iēsous', definition: 'Jesus — Yahweh saves, the Son of God', language: 'greek' },
     { id: 'G5547', original: 'Χριστός', transliteration: 'Christos', definition: 'Christ, Anointed One — the Messiah', language: 'greek' },
     { id: 'G4151', original: 'πνεῦμα', transliteration: 'pneuma', definition: 'Spirit, wind, breath — the Holy Spirit', language: 'greek' },
-    { id: 'G26', original: 'ἀγάπη', transliteration: 'agapē', definition: 'Love, charity — unconditional, self-sacrificing love', language: 'greek' },
-    { id: 'G4102', original: 'πίστις', transliteration: 'pistis', definition: 'Faith, belief, trust — conviction of truth', language: 'greek' },
-    { id: 'G5485', original: 'χάρις', transliteration: 'charis', definition: 'Grace, favor — divine influence upon the heart', language: 'greek' },
-    { id: 'G1515', original: 'εἰρήνη', transliteration: 'eirēnē', definition: 'Peace, quietness, rest — harmony with God', language: 'greek' },
-    { id: 'G1680', original: 'ἐλπίς', transliteration: 'elpis', definition: 'Hope, expectation — joyful and confident expectation', language: 'greek' },
-    { id: 'G4991', original: 'σωτηρία', transliteration: 'sōtēria', definition: 'Salvation, deliverance, preservation', language: 'greek' },
-    { id: 'G932', original: 'βασιλεία', transliteration: 'basileia', definition: 'Kingdom, sovereignty — the kingdom of God', language: 'greek' },
-    { id: 'G3056', original: 'λόγος', transliteration: 'logos', definition: 'Word, speech, reason — the divine Word, Christ as Logos', language: 'greek' },
+    { id: 'G26', original: 'ἀγάπη', transliteration: 'agapē', definition: 'Love, charity — unconditional love', language: 'greek' },
+    { id: 'G4102', original: 'πίστις', transliteration: 'pistis', definition: 'Faith, belief, trust', language: 'greek' },
+    { id: 'G5485', original: 'χάρις', transliteration: 'charis', definition: 'Grace, favor — divine influence', language: 'greek' },
+    { id: 'G1515', original: 'εἰρήνη', transliteration: 'eirēnē', definition: 'Peace, quietness, rest', language: 'greek' },
+    { id: 'G1680', original: 'ἐλπίς', transliteration: 'elpis', definition: 'Hope, expectation', language: 'greek' },
+    { id: 'G4991', original: 'σωτηρία', transliteration: 'sōtēria', definition: 'Salvation, deliverance', language: 'greek' },
+    { id: 'G932', original: 'βασιλεία', transliteration: 'basileia', definition: 'Kingdom, sovereignty', language: 'greek' },
+    { id: 'G3056', original: 'λόγος', transliteration: 'logos', definition: 'Word, speech, reason — the divine Word', language: 'greek' },
     { id: 'G2222', original: 'ζωή', transliteration: 'zōē', definition: 'Life — spiritual and eternal life', language: 'greek' },
     { id: 'G266', original: 'ἁμαρτία', transliteration: 'hamartia', definition: 'Sin, offense — missing the mark', language: 'greek' },
     { id: 'G1342', original: 'δίκαιος', transliteration: 'dikaios', definition: 'Righteous, just, upright', language: 'greek' },
-    { id: 'G2889', original: 'κόσμος', transliteration: 'kosmos', definition: 'World, universe, order — the world system', language: 'greek' },
+    { id: 'G2889', original: 'κόσμος', transliteration: 'kosmos', definition: 'World, universe, order', language: 'greek' },
     { id: 'G1577', original: 'ἐκκλησία', transliteration: 'ekklēsia', definition: 'Church, assembly, congregation', language: 'greek' },
-    { id: 'G2098', original: 'εὐαγγέλιον', transliteration: 'euangelion', definition: 'Gospel, good news — glad tidings of salvation', language: 'greek' },
+    { id: 'G2098', original: 'εὐαγγέλιον', transliteration: 'euangelion', definition: 'Gospel, good news', language: 'greek' },
     { id: 'G4561', original: 'σάρξ', transliteration: 'sarx', definition: 'Flesh, body, human nature', language: 'greek' },
-    { id: 'G4396', original: 'προφήτης', transliteration: 'prophētēs', definition: 'Prophet, foreteller — one inspired by God', language: 'greek' },
+    { id: 'G4396', original: 'προφήτης', transliteration: 'prophētēs', definition: 'Prophet, foreteller', language: 'greek' },
     { id: 'G1849', original: 'ἐξουσία', transliteration: 'exousia', definition: 'Authority, power, right', language: 'greek' },
-    { id: 'G3551', original: 'νόμος', transliteration: 'nomos', definition: 'Law, regulation, principle — the Mosaic Law', language: 'greek' },
+    { id: 'G3551', original: 'νόμος', transliteration: 'nomos', definition: 'Law, regulation, principle', language: 'greek' },
     { id: 'G1325', original: 'δίδωμι', transliteration: 'didōmi', definition: 'To give, grant, bestow', language: 'greek' },
-    { id: 'G4100', original: 'πιστεύω', transliteration: 'pisteuō', definition: 'To believe, trust, have faith in', language: 'greek' },
-    { id: 'G3962', original: 'πατήρ', transliteration: 'patēr', definition: 'Father — God as Father, a human father', language: 'greek' },
+    { id: 'G4100', original: 'πιστεύω', transliteration: 'pisteuō', definition: 'To believe, trust, have faith', language: 'greek' },
+    { id: 'G3962', original: 'πατήρ', transliteration: 'patēr', definition: 'Father — God as Father', language: 'greek' },
   ];
 
   const insertStrong = db.prepare('INSERT INTO strongs (id, original, transliteration, definition, language) VALUES (?, ?, ?, ?, ?)');
@@ -292,18 +310,100 @@ async function main() {
       insertWordStrong.run(book, ch, v, word, sid, pos);
     }
   })();
+  console.log("Strong's concordance seeded.");
 
-  console.log('Strong\'s concordance seeded.');
+  // ── Word Provenance ─────────────────────────────────────────
+  console.log('Seeding word provenance data...');
+  const provenanceData = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'provenance.json'), 'utf-8'));
+
+  const insertProvenance = db.prepare(`INSERT INTO word_provenance
+    (word, language, lemma, definition, etymology, proto_root, first_occurrence,
+     parent_word_id, manuscript_sources, textual_variants, academic_refs,
+     logeion_url, perseus_url, part_of_speech)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+
+  // Two passes: first insert all, then resolve parent links
+  const lemmaToId: Record<string, number> = {};
+
+  db.transaction(() => {
+    for (const entry of provenanceData) {
+      const result = insertProvenance.run(
+        entry.word, entry.language, entry.lemma, entry.definition,
+        entry.etymology || null, entry.proto_root || null, entry.first_occurrence || null,
+        null, // parent_word_id resolved in pass 2
+        JSON.stringify(entry.manuscript_sources || []),
+        JSON.stringify(entry.textual_variants || []),
+        JSON.stringify(entry.academic_refs || {}),
+        entry.logeion_url || null, entry.perseus_url || null,
+        entry.part_of_speech || null
+      );
+      const id = Number(result.lastInsertRowid);
+      lemmaToId[`${entry.language}:${entry.lemma}`] = id;
+    }
+  })();
+
+  // Pass 2: resolve parent links
+  const updateParent = db.prepare('UPDATE word_provenance SET parent_word_id = ? WHERE id = ?');
+  db.transaction(() => {
+    for (const entry of provenanceData) {
+      if (entry.parent_lemma && entry.parent_language) {
+        const childId = lemmaToId[`${entry.language}:${entry.lemma}`];
+        const parentId = lemmaToId[`${entry.parent_language}:${entry.parent_lemma}`];
+        if (childId && parentId) {
+          updateParent.run(parentId, childId);
+        }
+      }
+    }
+  })();
+  console.log(`  ${provenanceData.length} word provenance entries seeded.`);
+
+  // ── Latin Words table ───────────────────────────────────────
+  console.log('Populating latin_words from provenance...');
+  const latinEntries = provenanceData.filter((e: any) => e.language === 'latin');
+  const insertLatinWord = db.prepare(`INSERT OR IGNORE INTO latin_words
+    (word, lemma, definition, part_of_speech, etymology, provenance_id) VALUES (?, ?, ?, ?, ?, ?)`);
+
+  db.transaction(() => {
+    for (const entry of latinEntries) {
+      const provId = lemmaToId[`latin:${entry.lemma}`];
+      insertLatinWord.run(entry.word, entry.lemma, entry.definition, entry.part_of_speech, entry.etymology, provId || null);
+    }
+  })();
+
+  // Count Vulgate occurrences for each latin word
+  console.log('Counting Latin word occurrences in Vulgate...');
+  const vulVerses = db.prepare("SELECT id, text FROM verses WHERE translation = 'VUL'").all() as { id: number; text: string }[];
+  const wordCounts: Record<string, number> = {};
+  const latinWordSet = new Set(latinEntries.map((e: any) => e.lemma.toLowerCase()));
+
+  for (const v of vulVerses) {
+    const words = v.text.toLowerCase().replace(/[^a-zàáâãäåèéêëìíîïòóôõöùúûüý]/g, ' ').split(/\s+/).filter(Boolean);
+    for (const w of words) {
+      if (latinWordSet.has(w)) {
+        wordCounts[w] = (wordCounts[w] || 0) + 1;
+      }
+    }
+  }
+
+  const updateOccurrences = db.prepare('UPDATE latin_words SET occurrences = ? WHERE lemma = ?');
+  db.transaction(() => {
+    for (const [word, count] of Object.entries(wordCounts)) {
+      updateOccurrences.run(count, word);
+    }
+  })();
+  console.log(`  Latin word occurrences counted.`);
 
   db.close();
   console.log('\n✅ Database seeded successfully!');
-  
+
   const statsDb = new Database(DB_PATH, { readonly: true });
   const verseCount = statsDb.prepare('SELECT COUNT(*) as c FROM verses').get() as any;
   const xrefCount = statsDb.prepare('SELECT COUNT(*) as c FROM cross_references').get() as any;
+  const provCount = statsDb.prepare('SELECT COUNT(*) as c FROM word_provenance').get() as any;
   const translationStats = statsDb.prepare('SELECT translation, COUNT(*) as c FROM verses GROUP BY translation').all();
   console.log(`Total verses: ${verseCount.c}`);
   console.log(`Cross-references: ${xrefCount.c}`);
+  console.log(`Word provenance entries: ${provCount.c}`);
   console.log('Translations:', translationStats);
   statsDb.close();
 }
