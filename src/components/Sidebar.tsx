@@ -96,6 +96,15 @@ export default function Sidebar() {
             <Link href="/timeline" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
               📅 Timeline
             </Link>
+            <Link href="/study-notes" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              📝 Notes
+            </Link>
+            <Link href="/reading-plans" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              📅 Plans
+            </Link>
+            <Link href="/alphabet" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              🔤 Alphabet
+            </Link>
           </div>
 
           <div className="mb-2">

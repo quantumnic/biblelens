@@ -140,6 +140,21 @@ export default function Home() {
             <p className="text-sm text-parchment-200 mt-2 font-semibold">Timeline</p>
             <p className="text-xs text-parchment-500 mt-0.5">Biblical chronology</p>
           </Link>
+          <Link href="/study-notes" className="p-4 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all text-center group">
+            <span className="text-2xl group-hover:scale-110 inline-block transition-transform">📝</span>
+            <p className="text-sm text-parchment-200 mt-2 font-semibold">Study Notes</p>
+            <p className="text-xs text-parchment-500 mt-0.5">Personal annotations</p>
+          </Link>
+          <Link href="/reading-plans" className="p-4 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all text-center group">
+            <span className="text-2xl group-hover:scale-110 inline-block transition-transform">📅</span>
+            <p className="text-sm text-parchment-200 mt-2 font-semibold">Reading Plans</p>
+            <p className="text-xs text-parchment-500 mt-0.5">Guided study tracks</p>
+          </Link>
+          <Link href="/alphabet" className="p-4 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all text-center group">
+            <span className="text-2xl group-hover:scale-110 inline-block transition-transform">🔤</span>
+            <p className="text-sm text-parchment-200 mt-2 font-semibold">Alphabets</p>
+            <p className="text-xs text-parchment-500 mt-0.5">Hebrew &amp; Greek</p>
+          </Link>
         </div>
 
         {/* Popular Passages */}

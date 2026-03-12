@@ -145,6 +145,11 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     { name: 'ORCID (scholars)', url: `https://orcid.org/orcid-search/search?searchQuery=${encodeURIComponent('biblical ' + (bookName || ''))}`, icon: '👤', desc: 'Find biblical scholars' },
     { name: 'Aleppo Codex', url: 'https://www.aleppocodex.org/', icon: '📖', desc: 'Oldest complete Hebrew Bible' },
     { name: 'Early Church Texts', url: 'https://www.earlychurchtexts.com/', icon: '⛪', desc: 'Patristic writings' },
+    { name: 'Sefaria', url: `https://www.sefaria.org/search?q=${encodeURIComponent(bookName + ' ' + chapter + ':' + verse)}&tab=text`, icon: '📗', desc: 'Jewish texts & commentaries (Rashi, Rambam)' },
+    { name: 'ETCBC (BHSA)', url: 'https://shebanq.ancient-data.org/hebrew/query', icon: '🔬', desc: 'Hebrew syntax database (Eep Talstra Centre)' },
+    { name: 'Codex Sinaiticus', url: 'https://codexsinaiticus.org/en/', icon: '📜', desc: '4th-century Greek manuscript (complete NT)' },
+    { name: 'Textus Receptus', url: `https://www.textusreceptusbibles.com/`, icon: '📖', desc: 'Greek NT underlying the KJV' },
+    { name: 'Bible Odyssey', url: `https://www.bibleodyssey.org/en/tools/search-results?q=${encodeURIComponent(bookName || '')}`, icon: '🗺️', desc: 'Society of Biblical Literature resources' },
   ];
 
   return (

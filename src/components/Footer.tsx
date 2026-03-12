@@ -28,6 +28,9 @@ export default function Footer() {
               <Link href="/analytics" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Analytics</Link>
               <Link href="/timeline" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Timeline</Link>
               <Link href="/verse-of-the-day" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Verse of the Day</Link>
+              <Link href="/study-notes" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Study Notes</Link>
+              <Link href="/reading-plans" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Reading Plans</Link>
+              <Link href="/alphabet" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Alphabets</Link>
             </div>
           </div>
           <div>
