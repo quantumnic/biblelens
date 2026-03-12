@@ -1,9 +1,12 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+
 interface WordFreq { word: string; count: number; }
 interface SentimentPoint { chapter: number; positive: number; negative: number; score: number; }
 interface BookStat { name: string; book: number; verses: number; chars: number; testament: string; }
 interface TimelineEvent { book: string; period: string; event: string; }
+interface ThemeData { theme: string; count: number; topVerses: { book: number; chapter: number; verse: number; matches: number }[] }
 
 interface Props {
   topWords: WordFreq[];
@@ -12,119 +15,200 @@ interface Props {
   timeline: TimelineEvent[];
   bookName: string;
   sentBookName: string;
+  bookId?: number;
 }
 
-export default function AnalyticsCharts({ topWords, sentimentData, bookStats, timeline, bookName, sentBookName }: Props) {
+export default function AnalyticsCharts({ topWords, sentimentData, bookStats, timeline, bookName, sentBookName, bookId }: Props) {
   const maxWordCount = topWords[0]?.count || 1;
   const maxSentiment = Math.max(...sentimentData.map(s => Math.abs(s.score)), 1);
   const maxVerses = Math.max(...bookStats.map(b => b.verses), 1);
 
+  const [themes, setThemes] = useState<ThemeData[]>([]);
+  const [themesLoading, setThemesLoading] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>('all');
+
+  useEffect(() => {
+    setThemesLoading(true);
+    const url = bookId && bookId > 0
+      ? `/api/theological-themes?book=${bookId}`
+      : '/api/theological-themes';
+    fetch(url)
+      .then(r => r.json())
+      .then(d => { setThemes(d.data || []); setThemesLoading(false); })
+      .catch(() => setThemesLoading(false));
+  }, [bookId]);
+
+  const maxThemeCount = themes[0]?.count || 1;
+
+  const sections = [
+    { id: 'all', label: '📋 All' },
+    { id: 'words', label: '📝 Words' },
+    { id: 'sentiment', label: '🎭 Sentiment' },
+    { id: 'themes', label: '⛪ Themes' },
+    { id: 'books', label: '📚 Books' },
+    { id: 'timeline', label: '⏳ Timeline' },
+  ];
+
+  const show = (section: string) => activeSection === 'all' || activeSection === section;
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      {/* Section filter */}
+      <div className="flex flex-wrap gap-2">
+        {sections.map(s => (
+          <button
+            key={s.id}
+            onClick={() => setActiveSection(s.id)}
+            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+              activeSection === s.id
+                ? 'bg-gold-600 text-parchment-950 border-gold-600 font-semibold'
+                : 'bg-parchment-900 text-parchment-400 border-parchment-700 hover:border-gold-500'
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+
       {/* Word Frequency */}
-      <section className="bg-parchment-900 border border-parchment-800 rounded-2xl p-6">
-        <h2 className="text-xl font-semibold text-parchment-200 mb-1">📝 Word Frequency</h2>
-        <p className="text-xs text-parchment-500 mb-4">Top 30 words in {bookName} (KJV, stop words excluded)</p>
-        <div className="space-y-1">
-          {topWords.map(w => (
-            <div key={w.word} className="flex items-center gap-3">
-              <span className="text-xs text-parchment-400 w-24 text-right font-mono">{w.word}</span>
-              <div className="flex-1 h-5 bg-parchment-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-gold-600 to-gold-400 rounded-full transition-all"
-                  style={{ width: `${(w.count / maxWordCount) * 100}%` }}
-                />
-              </div>
-              <span className="text-xs text-parchment-500 w-12">{w.count}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Sentiment Analysis */}
-      <section className="bg-parchment-900 border border-parchment-800 rounded-2xl p-6">
-        <h2 className="text-xl font-semibold text-parchment-200 mb-1">🎭 Sentiment Analysis</h2>
-        <p className="text-xs text-parchment-500 mb-4">{sentBookName} — positive vs negative word density per chapter</p>
-        <div className="flex items-end gap-[2px] h-48 overflow-x-auto pb-6">
-          {sentimentData.map(s => {
-            const height = Math.abs(s.score) / maxSentiment * 100;
-            const isPositive = s.score >= 0;
-            return (
-              <div key={s.chapter} className="flex flex-col items-center min-w-[12px] relative group" style={{ height: '100%' }}>
-                <div className="flex-1 flex items-end w-full">
+      {show('words') && (
+        <section className="bg-parchment-900 border border-parchment-800 rounded-2xl p-6">
+          <h2 className="text-xl font-semibold text-parchment-200 mb-1">📝 Word Frequency</h2>
+          <p className="text-xs text-parchment-500 mb-4">Top 30 words in {bookName} (KJV, stop words excluded)</p>
+          <div className="space-y-1">
+            {topWords.map(w => (
+              <div key={w.word} className="flex items-center gap-3">
+                <span className="text-xs text-parchment-400 w-24 text-right font-mono">{w.word}</span>
+                <div className="flex-1 h-5 bg-parchment-800 rounded-full overflow-hidden">
                   <div
-                    className={`w-full rounded-t transition-all ${isPositive ? 'bg-emerald-500/70' : 'bg-red-500/70'}`}
-                    style={{ height: `${Math.max(height, 4)}%` }}
+                    className="h-full bg-gradient-to-r from-gold-600 to-gold-400 rounded-full transition-all"
+                    style={{ width: `${(w.count / maxWordCount) * 100}%` }}
                   />
                 </div>
-                <span className="text-[8px] text-parchment-600 mt-1">{s.chapter}</span>
-                
-                {/* Tooltip */}
-                <div className="absolute bottom-full mb-2 hidden group-hover:block bg-parchment-800 text-xs text-parchment-200 px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
-                  Ch. {s.chapter}: +{s.positive} / -{s.negative} = {s.score > 0 ? '+' : ''}{s.score}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div className="flex gap-4 text-xs text-parchment-500 mt-2">
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-emerald-500/70" /> Positive</span>
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-500/70" /> Negative</span>
-        </div>
-      </section>
-
-      {/* Book Statistics */}
-      <section className="bg-parchment-900 border border-parchment-800 rounded-2xl p-6">
-        <h2 className="text-xl font-semibold text-parchment-200 mb-1">📚 Book Statistics</h2>
-        <p className="text-xs text-parchment-500 mb-4">Verse count per book — all 66 books</p>
-        <div className="flex items-end gap-[2px] h-40 overflow-x-auto pb-6">
-          {bookStats.map(b => {
-            const height = (b.verses / maxVerses) * 100;
-            return (
-              <div key={b.book} className="flex flex-col items-center min-w-[10px] relative group" style={{ height: '100%' }}>
-                <div className="flex-1 flex items-end w-full">
-                  <div
-                    className={`w-full rounded-t transition-all ${b.testament === 'OT' ? 'bg-amber-600/70' : 'bg-blue-500/70'}`}
-                    style={{ height: `${Math.max(height, 2)}%` }}
-                  />
-                </div>
-                <div className="absolute bottom-full mb-2 hidden group-hover:block bg-parchment-800 text-xs text-parchment-200 px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
-                  {b.name}: {b.verses} verses
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div className="flex gap-4 text-xs text-parchment-500 mt-2">
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-amber-600/70" /> Old Testament</span>
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-blue-500/70" /> New Testament</span>
-        </div>
-      </section>
-
-      {/* Historical Timeline */}
-      <section className="bg-parchment-900 border border-parchment-800 rounded-2xl p-6">
-        <h2 className="text-xl font-semibold text-parchment-200 mb-1">⏳ Historical Timeline</h2>
-        <p className="text-xs text-parchment-500 mb-4">When books were written and what was happening in the world</p>
-        <div className="relative">
-          <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gold-600/30" />
-          <div className="space-y-4">
-            {timeline.map((t, i) => (
-              <div key={i} className="flex items-start gap-4 ml-1">
-                <div className="w-7 h-7 rounded-full bg-gold-600 flex items-center justify-center text-xs text-parchment-950 font-bold flex-shrink-0 relative z-10">
-                  {i + 1}
-                </div>
-                <div className="bg-parchment-800 rounded-lg p-3 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-semibold text-gold-400">{t.book}</span>
-                    <span className="text-xs text-parchment-500 font-mono">{t.period}</span>
-                  </div>
-                  <p className="text-xs text-parchment-400">{t.event}</p>
-                </div>
+                <span className="text-xs text-parchment-500 w-12">{w.count}</span>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
+      )}
+
+      {/* Sentiment Analysis */}
+      {show('sentiment') && (
+        <section className="bg-parchment-900 border border-parchment-800 rounded-2xl p-6">
+          <h2 className="text-xl font-semibold text-parchment-200 mb-1">🎭 Sentiment Analysis</h2>
+          <p className="text-xs text-parchment-500 mb-4">{sentBookName} — positive vs negative word density per chapter</p>
+          <div className="flex items-end gap-[2px] h-48 overflow-x-auto pb-6">
+            {sentimentData.map(s => {
+              const height = Math.abs(s.score) / maxSentiment * 100;
+              const isPositive = s.score >= 0;
+              return (
+                <div key={s.chapter} className="flex flex-col items-center min-w-[12px] relative group" style={{ height: '100%' }}>
+                  <div className="flex-1 flex items-end w-full">
+                    <div
+                      className={`w-full rounded-t transition-all ${isPositive ? 'bg-emerald-500/70' : 'bg-red-500/70'}`}
+                      style={{ height: `${Math.max(height, 4)}%` }}
+                    />
+                  </div>
+                  <span className="text-[8px] text-parchment-600 mt-1">{s.chapter}</span>
+                  <div className="absolute bottom-full mb-2 hidden group-hover:block bg-parchment-800 text-xs text-parchment-200 px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
+                    Ch. {s.chapter}: +{s.positive} / -{s.negative} = {s.score > 0 ? '+' : ''}{s.score}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex gap-4 text-xs text-parchment-500 mt-2">
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-emerald-500/70" /> Positive</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-500/70" /> Negative</span>
+          </div>
+        </section>
+      )}
+
+      {/* Theological Themes */}
+      {show('themes') && (
+        <section className="bg-parchment-900 border border-parchment-800 rounded-2xl p-6">
+          <h2 className="text-xl font-semibold text-parchment-200 mb-1">⛪ Theological Themes</h2>
+          <p className="text-xs text-parchment-500 mb-4">Keyword-based theme density in {bookName}</p>
+          {themesLoading ? (
+            <div className="text-parchment-500 text-sm animate-pulse">Analyzing themes…</div>
+          ) : (
+            <div className="space-y-2">
+              {themes.map(t => (
+                <div key={t.theme} className="group">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-parchment-300 w-28 text-right font-medium">{t.theme}</span>
+                    <div className="flex-1 h-6 bg-parchment-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-blue-600/70 to-blue-400/70 rounded-full transition-all flex items-center pl-2"
+                        style={{ width: `${Math.max((t.count / maxThemeCount) * 100, 5)}%` }}
+                      >
+                        <span className="text-[10px] text-white font-mono">{t.count}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* Book Statistics */}
+      {show('books') && (
+        <section className="bg-parchment-900 border border-parchment-800 rounded-2xl p-6">
+          <h2 className="text-xl font-semibold text-parchment-200 mb-1">📚 Book Statistics</h2>
+          <p className="text-xs text-parchment-500 mb-4">Verse count per book — all 66 books</p>
+          <div className="flex items-end gap-[2px] h-40 overflow-x-auto pb-6">
+            {bookStats.map(b => {
+              const height = (b.verses / maxVerses) * 100;
+              return (
+                <div key={b.book} className="flex flex-col items-center min-w-[10px] relative group" style={{ height: '100%' }}>
+                  <div className="flex-1 flex items-end w-full">
+                    <div
+                      className={`w-full rounded-t transition-all ${b.testament === 'OT' ? 'bg-amber-600/70' : 'bg-blue-500/70'}`}
+                      style={{ height: `${Math.max(height, 2)}%` }}
+                    />
+                  </div>
+                  <div className="absolute bottom-full mb-2 hidden group-hover:block bg-parchment-800 text-xs text-parchment-200 px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
+                    {b.name}: {b.verses} verses
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex gap-4 text-xs text-parchment-500 mt-2">
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-amber-600/70" /> Old Testament</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-blue-500/70" /> New Testament</span>
+          </div>
+        </section>
+      )}
+
+      {/* Historical Timeline */}
+      {show('timeline') && (
+        <section className="bg-parchment-900 border border-parchment-800 rounded-2xl p-6">
+          <h2 className="text-xl font-semibold text-parchment-200 mb-1">⏳ Historical Timeline</h2>
+          <p className="text-xs text-parchment-500 mb-4">When books were written and what was happening in the world</p>
+          <div className="relative">
+            <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gold-600/30" />
+            <div className="space-y-4">
+              {timeline.map((t, i) => (
+                <div key={i} className="flex items-start gap-4 ml-1">
+                  <div className="w-7 h-7 rounded-full bg-gold-600 flex items-center justify-center text-xs text-parchment-950 font-bold flex-shrink-0 relative z-10">
+                    {i + 1}
+                  </div>
+                  <div className="bg-parchment-800 rounded-lg p-3 flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-semibold text-gold-400">{t.book}</span>
+                      <span className="text-xs text-parchment-500 font-mono">{t.period}</span>
+                    </div>
+                    <p className="text-xs text-parchment-400">{t.event}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Quick Stats */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -26,7 +26,7 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
   const [papers, setPapers] = useState<Paper[]>([]);
   const [pubmed, setPubmed] = useState<PubMedResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'ai' | 'scholar' | 'pubmed'>('ai');
+  const [activeTab, setActiveTab] = useState<'ai' | 'scholar' | 'pubmed' | 'resources'>('ai');
 
   const bookInfo = getBookById(book);
   const bookName = bookInfo?.name || '';
@@ -68,6 +68,8 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     { label: '🔤 Linguistic analysis', query: `Linguistic analysis of key terms in ${ref} including original Hebrew or Greek meanings` },
     { label: '📜 Textual criticism', query: `What are the textual variants and manuscript differences for ${ref}?` },
     { label: '🗺️ Geography', query: `Where did the events of ${ref} take place? Describe the geographical and archaeological setting` },
+    { label: '⛪ Patristic commentary', query: `What did early Church Fathers say about ${ref}? Include commentaries from Augustine, Chrysostom, Jerome, and others` },
+    { label: '🔄 Intertextuality', query: `How does ${ref} connect to other passages in the Bible? Show thematic and literary connections` },
   ];
 
   const aiLinks = (query: string) => [
@@ -78,11 +80,25 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     { name: 'JSTOR', url: `https://www.jstor.org/action/doBasicSearch?Query=${encodeURIComponent(query)}`, icon: '📖' },
   ];
 
+  // External resource links
+  const resourceLinks = [
+    { name: 'OpenAlex', url: `https://openalex.org/works?search=${encodeURIComponent(searchQuery + ' biblical')}`, icon: '📊', desc: 'Open scholarly metadata' },
+    { name: 'CrossRef', url: `https://search.crossref.org/?q=${encodeURIComponent(searchQuery + ' biblical')}&from_ui=yes`, icon: '🔗', desc: 'DOI-linked articles' },
+    { name: 'Bible Hub', url: `https://biblehub.com/${bookName?.toLowerCase().replace(/ /g, '_')}/${chapter}-${verse}.htm`, icon: '📖', desc: 'Commentaries & lexicon' },
+    { name: 'Blue Letter Bible', url: `https://www.blueletterbible.org/search/search.cfm?Criteria=${encodeURIComponent(ref)}&t=KJV`, icon: '🔵', desc: 'Interlinear & word study' },
+    { name: 'NET Bible', url: `https://netbible.org/bible/${bookName?.replace(/ /g, '+')}+${chapter}`, icon: '🌐', desc: 'Translation notes' },
+    { name: 'STEP Bible', url: `https://www.stepbible.org/?q=reference=${encodeURIComponent(ref)}|version=ESV`, icon: '📚', desc: 'Multi-resource lookup' },
+    { name: 'Mechon Mamre', url: 'https://www.mechon-mamre.org/', icon: '🕎', desc: 'Hebrew Bible (Tanakh)' },
+    { name: 'Perseus Digital Library', url: `https://www.perseus.tufts.edu/hopper/searchresults?q=${encodeURIComponent(bookName || '')}`, icon: '🏛️', desc: 'Greek & Latin texts' },
+    { name: 'INTF (NT Manuscripts)', url: 'https://ntvmr.uni-muenster.de/home', icon: '📜', desc: 'NT manuscript transcripts' },
+    { name: 'Logeion', url: `https://logeion.uchicago.edu/`, icon: '📕', desc: 'Greek & Latin lexicon' },
+  ];
+
   return (
     <div className="space-y-3">
       {/* Tab bar */}
       <div className="flex gap-1 bg-parchment-800 rounded-lg p-1">
-        {([['ai', '🤖 AI'], ['scholar', '🎓 Scholar'], ['pubmed', '🏥 PubMed']] as const).map(([key, label]) => (
+        {([['ai', '🤖 AI'], ['scholar', '🎓 Scholar'], ['pubmed', '🏥 PubMed'], ['resources', '🔗 Links']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
@@ -168,6 +184,28 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
               {p.authors.length > 0 && (
                 <p className="text-xs text-parchment-500 mt-1">{p.authors.slice(0, 3).join(', ')}{p.authors.length > 3 ? ' et al.' : ''}</p>
               )}
+            </a>
+          ))}
+        </div>
+      )}
+
+      {/* Resources Tab */}
+      {activeTab === 'resources' && (
+        <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+          <p className="text-xs text-parchment-500 mb-2">External resources for <strong className="text-gold-400">{ref}</strong></p>
+          {resourceLinks.map(link => (
+            <a
+              key={link.name}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 p-3 rounded-lg bg-parchment-800 hover:bg-parchment-700 transition-colors"
+            >
+              <span className="text-lg flex-shrink-0">{link.icon}</span>
+              <div>
+                <h4 className="text-sm text-parchment-200 font-medium">{link.name}</h4>
+                <p className="text-xs text-parchment-500">{link.desc}</p>
+              </div>
             </a>
           ))}
         </div>

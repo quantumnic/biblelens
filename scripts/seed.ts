@@ -289,13 +289,78 @@ async function main() {
     { id: 'G3962', original: 'πατήρ', transliteration: 'patēr', definition: 'Father — God as Father', language: 'greek' },
   ];
 
-  const insertStrong = db.prepare('INSERT INTO strongs (id, original, transliteration, definition, language) VALUES (?, ?, ?, ?, ?)');
+  // Extended Strong's entries
+  const extendedStrongs = [
+    { id: 'H2451', original: 'חׇכְמָה', transliteration: 'chokmah', definition: 'Wisdom, skill, experience — practical and ethical wisdom', language: 'hebrew' },
+    { id: 'H6663', original: 'צָדַק', transliteration: 'tsadaq', definition: 'To be just, righteous, to justify', language: 'hebrew' },
+    { id: 'H3045', original: 'יָדַע', transliteration: 'yada', definition: 'To know, perceive, discern — intimate knowledge', language: 'hebrew' },
+    { id: 'H5769', original: 'עוֹלָם', transliteration: 'olam', definition: 'Everlasting, forever, perpetual, ancient', language: 'hebrew' },
+    { id: 'H6944', original: 'קֹדֶשׁ', transliteration: 'qodesh', definition: 'Holy, set apart, sacred, consecrated', language: 'hebrew' },
+    { id: 'H3519', original: 'כָּבוֹד', transliteration: 'kabod', definition: 'Glory, honour, splendour, abundance', language: 'hebrew' },
+    { id: 'H571', original: 'אֱמֶת', transliteration: 'emeth', definition: 'Truth, firmness, faithfulness, reliability', language: 'hebrew' },
+    { id: 'H2580', original: 'חֵן', transliteration: 'chen', definition: 'Grace, favour, charm, elegance', language: 'hebrew' },
+    { id: 'H3374', original: 'יִרְאָה', transliteration: 'yirah', definition: 'Fear, reverence, awe — the fear of God', language: 'hebrew' },
+    { id: 'H5162', original: 'נָחַם', transliteration: 'nacham', definition: 'To comfort, console, repent, be sorry', language: 'hebrew' },
+    { id: 'H7225', original: 'רֵאשִׁית', transliteration: 'reshith', definition: 'Beginning, first, chief, choicest', language: 'hebrew' },
+    { id: 'H4941', original: 'מִשְׁפָּט', transliteration: 'mishpat', definition: 'Judgment, justice, ordinance, manner, right', language: 'hebrew' },
+    { id: 'H3027', original: 'יָד', transliteration: 'yad', definition: 'Hand, power, strength, direction', language: 'hebrew' },
+    { id: 'H6440', original: 'פָּנִים', transliteration: 'panim', definition: 'Face, presence, countenance', language: 'hebrew' },
+    { id: 'H1870', original: 'דֶּרֶךְ', transliteration: 'derek', definition: 'Way, road, path, journey, manner of life', language: 'hebrew' },
+    { id: 'H6213', original: 'עָשָׂה', transliteration: 'asah', definition: 'To do, make, accomplish, complete', language: 'hebrew' },
+    { id: 'H559', original: 'אָמַר', transliteration: 'amar', definition: 'To say, speak, utter, command', language: 'hebrew' },
+    { id: 'H8085', original: 'שָׁמַע', transliteration: 'shama', definition: 'To hear, listen, obey', language: 'hebrew' },
+    { id: 'H982', original: 'בָּטַח', transliteration: 'batach', definition: 'To trust, be confident, rely upon', language: 'hebrew' },
+    { id: 'H7121', original: 'קָרָא', transliteration: 'qara', definition: 'To call, proclaim, read aloud, name', language: 'hebrew' },
+    { id: 'H3384', original: 'יָרָה', transliteration: 'yarah', definition: 'To throw, shoot, teach, instruct (root of Torah)', language: 'hebrew' },
+    { id: 'H3117', original: 'יוֹם', transliteration: 'yom', definition: 'Day, time, year — period of light or of time', language: 'hebrew' },
+    { id: 'H5971', original: 'עַם', transliteration: 'am', definition: 'People, nation, folk — often God\'s people', language: 'hebrew' },
+    { id: 'H216', original: 'אוֹר', transliteration: 'or', definition: 'Light, daylight, brightness', language: 'hebrew' },
+    { id: 'H5410', original: 'נָתִיב', transliteration: 'nathiyb', definition: 'Path, pathway', language: 'hebrew' },
+    { id: 'H5216', original: 'נֵר', transliteration: 'ner', definition: 'Lamp, candle, light', language: 'hebrew' },
+    { id: 'H7272', original: 'רֶגֶל', transliteration: 'regel', definition: 'Foot, leg', language: 'hebrew' },
+    { id: 'H6588', original: 'פֶּשַׁע', transliteration: 'pesha', definition: 'Transgression, rebellion, revolt', language: 'hebrew' },
+    { id: 'H2490', original: 'חָלַל', transliteration: 'chalal', definition: 'To pierce, wound, profane, pollute', language: 'hebrew' },
+    { id: 'H7495', original: 'רָפָא', transliteration: 'rapha', definition: 'To heal, make whole, cure', language: 'hebrew' },
+    { id: 'G3341', original: 'μετάνοια', transliteration: 'metanoia', definition: 'Repentance, change of mind and heart', language: 'greek' },
+    { id: 'G1411', original: 'δύναμις', transliteration: 'dynamis', definition: 'Power, ability, might, miracle', language: 'greek' },
+    { id: 'G225', original: 'ἀλήθεια', transliteration: 'alētheia', definition: 'Truth, reality — that which is not hidden', language: 'greek' },
+    { id: 'G1391', original: 'δόξα', transliteration: 'doxa', definition: 'Glory, honour, praise, splendour', language: 'greek' },
+    { id: 'G2842', original: 'κοινωνία', transliteration: 'koinōnia', definition: 'Fellowship, communion, sharing, participation', language: 'greek' },
+    { id: 'G3875', original: 'παράκλητος', transliteration: 'paraklētos', definition: 'Advocate, comforter, helper — the Holy Spirit', language: 'greek' },
+    { id: 'G652', original: 'ἀπόστολος', transliteration: 'apostolos', definition: 'Apostle, messenger, one sent forth', language: 'greek' },
+    { id: 'G908', original: 'βάπτισμα', transliteration: 'baptisma', definition: 'Baptism, immersion, ceremonial washing', language: 'greek' },
+    { id: 'G40', original: 'ἅγιος', transliteration: 'hagios', definition: 'Holy, sacred, set apart — of God\'s nature', language: 'greek' },
+    { id: 'G5590', original: 'ψυχή', transliteration: 'psychē', definition: 'Soul, life, self, mind — the inner person', language: 'greek' },
+    { id: 'G2588', original: 'καρδία', transliteration: 'kardia', definition: 'Heart — the centre of all physical and spiritual life', language: 'greek' },
+    { id: 'G4678', original: 'σοφία', transliteration: 'sophia', definition: 'Wisdom — broad knowledge and learning', language: 'greek' },
+    { id: 'G3952', original: 'παρουσία', transliteration: 'parousia', definition: 'Coming, arrival, presence — the Second Coming', language: 'greek' },
+    { id: 'G386', original: 'ἀνάστασις', transliteration: 'anastasis', definition: 'Resurrection, a rising from the dead', language: 'greek' },
+    { id: 'G2041', original: 'ἔργον', transliteration: 'ergon', definition: 'Work, deed, labour, action', language: 'greek' },
+    { id: 'G2198', original: 'ζάω', transliteration: 'zaō', definition: 'To live, be alive — physical and spiritual life', language: 'greek' },
+    { id: 'G2288', original: 'θάνατος', transliteration: 'thanatos', definition: 'Death — physical and spiritual death', language: 'greek' },
+    { id: 'G1242', original: 'διαθήκη', transliteration: 'diathēkē', definition: 'Covenant, testament, will — a divine arrangement', language: 'greek' },
+    { id: 'G2962', original: 'κύριος', transliteration: 'kyrios', definition: 'Lord, master, owner — a title for God and Christ', language: 'greek' },
+    { id: 'G746', original: 'ἀρχή', transliteration: 'archē', definition: 'Beginning, origin, first cause, ruler', language: 'greek' },
+    { id: 'G3772', original: 'οὐρανός', transliteration: 'ouranos', definition: 'Heaven, sky — the abode of God', language: 'greek' },
+    { id: 'G1093', original: 'γῆ', transliteration: 'gē', definition: 'Earth, land, ground, soil', language: 'greek' },
+    { id: 'G1484', original: 'ἔθνος', transliteration: 'ethnos', definition: 'Nation, people, Gentiles', language: 'greek' },
+    { id: 'G907', original: 'βαπτίζω', transliteration: 'baptizō', definition: 'To baptize, immerse, wash', language: 'greek' },
+    { id: 'G3107', original: 'μακάριος', transliteration: 'makarios', definition: 'Blessed, happy, fortunate', language: 'greek' },
+    { id: 'G1343', original: 'δικαιοσύνη', transliteration: 'dikaiosynē', definition: 'Righteousness, justice — the state of being right with God', language: 'greek' },
+    { id: 'G1679', original: 'ἐλπίζω', transliteration: 'elpizō', definition: 'To hope, expect, trust', language: 'greek' },
+    { id: 'G4982', original: 'σῴζω', transliteration: 'sōzō', definition: 'To save, deliver, heal, preserve', language: 'greek' },
+    { id: 'G18', original: 'ἀγαθός', transliteration: 'agathos', definition: 'Good, beneficial, upright', language: 'greek' },
+  ];
+
+  const insertStrong = db.prepare('INSERT OR IGNORE INTO strongs (id, original, transliteration, definition, language) VALUES (?, ?, ?, ?, ?)');
   db.transaction(() => {
     for (const s of strongsData) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
+    for (const s of extendedStrongs) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
   })();
+  console.log(`Strong's concordance seeded: ${strongsData.length + extendedStrongs.length} entries.`);
 
   // Word-strongs mappings
-  const insertWordStrong = db.prepare('INSERT INTO word_strongs (book, chapter, verse, word, strongs_id, position) VALUES (?, ?, ?, ?, ?, ?)');
+  const insertWordStrong = db.prepare('INSERT OR IGNORE INTO word_strongs (book, chapter, verse, word, strongs_id, position) VALUES (?, ?, ?, ?, ?, ?)');
   db.transaction(() => {
     const mappings = [
       [1,1,1,'God','H430',4],[1,1,1,'created','H1254',5],[1,1,1,'heaven','H8064',7],[1,1,1,'earth','H776',10],
@@ -305,6 +370,22 @@ async function main() {
       [49,2,8,'grace','G5485',4],[49,2,8,'faith','G4102',9],
       [19,23,1,'LORD','H3068',2],
       [19,119,105,'word','H1697',2],
+      // Extended mappings
+      [19,119,105,'lamp','H5216',4],[19,119,105,'feet','H7272',6],[19,119,105,'light','H216',8],[19,119,105,'path','H5410',10],
+      [20,3,5,'Trust','H982',1],[20,3,5,'LORD','H3068',4],[20,3,5,'heart','H3820',7],
+      [20,3,6,'ways','H1870',3],
+      [23,53,5,'wounded','H2490',3],[23,53,5,'transgressions','H6588',5],[23,53,5,'peace','H7965',9],[23,53,5,'healed','H7495',16],
+      [45,8,28,'God','G2316',6],[45,8,28,'love','G26',2],[45,8,28,'good','G18',9],
+      [49,2,8,'saved','G4982',4],[49,2,9,'works','G2041',4],
+      [46,13,13,'faith','G4102',4],[46,13,13,'hope','G1680',5],[46,13,13,'love','G26',6],
+      [43,1,1,'beginning','G746',4],[43,1,14,'flesh','G4561',4],[43,1,14,'glory','G1391',10],[43,1,14,'grace','G5485',14],[43,1,14,'truth','G225',16],
+      [66,21,1,'heaven','G3772',3],[66,21,1,'earth','G1093',6],
+      [40,28,19,'nations','G1484',5],[40,28,19,'baptizing','G907',6],[40,28,19,'Father','G3962',11],
+      [40,5,3,'blessed','G3107',1],[40,5,3,'kingdom','G932',8],[40,5,3,'heaven','G3772',10],
+      [40,5,4,'blessed','G3107',1],[40,5,6,'righteousness','G1343',8],
+      [58,11,1,'faith','G4102',2],[58,11,1,'hope','G1679',8],
+      [1,1,1,'beginning','H7225',2],[1,1,2,'Spirit','H7307',3],[1,1,3,'light','H216',4],
+      [5,6,4,'LORD','H3068',3],[5,6,4,'God','H430',5],[5,6,5,'love','H157',2],[5,6,5,'heart','H3820',6],[5,6,5,'soul','H5315',8],
     ];
     for (const [book,ch,v,word,sid,pos] of mappings) {
       insertWordStrong.run(book, ch, v, word, sid, pos);

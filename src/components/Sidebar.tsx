@@ -75,11 +75,17 @@ export default function Sidebar() {
             <Link href="/compare" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
               ⚖️ Compare
             </Link>
-            <Link href="/latin/amor" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              📜 Latin
+            <Link href="/analytics" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              📊 Analytics
             </Link>
             <Link href="/word/G26" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
               📖 Strong&apos;s
+            </Link>
+            <Link href="/latin/amor" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              📜 Latin
+            </Link>
+            <Link href="/verse-of-the-day" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              ✨ Daily
             </Link>
           </div>
 

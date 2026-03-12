@@ -1,0 +1,117 @@
+// Extended Strong's entries — additional 75 entries beyond the original 50
+export const EXTENDED_STRONGS = [
+  // Hebrew additions
+  { id: 'H2451', original: 'חׇכְמָה', transliteration: 'chokmah', definition: 'Wisdom, skill, experience — practical and ethical wisdom', language: 'hebrew' },
+  { id: 'H6663', original: 'צָדַק', transliteration: 'tsadaq', definition: 'To be just, righteous, to justify', language: 'hebrew' },
+  { id: 'H3045', original: 'יָדַע', transliteration: 'yada', definition: 'To know, perceive, discern — intimate knowledge', language: 'hebrew' },
+  { id: 'H5769', original: 'עוֹלָם', transliteration: 'olam', definition: 'Everlasting, forever, perpetual, ancient', language: 'hebrew' },
+  { id: 'H6944', original: 'קֹדֶשׁ', transliteration: 'qodesh', definition: 'Holy, set apart, sacred, consecrated', language: 'hebrew' },
+  { id: 'H3519', original: 'כָּבוֹד', transliteration: 'kabod', definition: 'Glory, honour, splendour, abundance', language: 'hebrew' },
+  { id: 'H571', original: 'אֱמֶת', transliteration: 'emeth', definition: 'Truth, firmness, faithfulness, reliability', language: 'hebrew' },
+  { id: 'H2580', original: 'חֵן', transliteration: 'chen', definition: 'Grace, favour, charm, elegance', language: 'hebrew' },
+  { id: 'H3374', original: 'יִרְאָה', transliteration: 'yirah', definition: 'Fear, reverence, awe — the fear of God', language: 'hebrew' },
+  { id: 'H5162', original: 'נָחַם', transliteration: 'nacham', definition: 'To comfort, console, repent, be sorry', language: 'hebrew' },
+  { id: 'H7225', original: 'רֵאשִׁית', transliteration: 'reshith', definition: 'Beginning, first, chief, choicest', language: 'hebrew' },
+  { id: 'H4941', original: 'מִשְׁפָּט', transliteration: 'mishpat', definition: 'Judgment, justice, ordinance, manner, right', language: 'hebrew' },
+  { id: 'H3027', original: 'יָד', transliteration: 'yad', definition: 'Hand, power, strength, direction', language: 'hebrew' },
+  { id: 'H6440', original: 'פָּנִים', transliteration: 'panim', definition: 'Face, presence, countenance', language: 'hebrew' },
+  { id: 'H1870', original: 'דֶּרֶךְ', transliteration: 'derek', definition: 'Way, road, path, journey, manner of life', language: 'hebrew' },
+  { id: 'H6213', original: 'עָשָׂה', transliteration: 'asah', definition: 'To do, make, accomplish, complete', language: 'hebrew' },
+  { id: 'H559', original: 'אָמַר', transliteration: 'amar', definition: 'To say, speak, utter, command', language: 'hebrew' },
+  { id: 'H8085', original: 'שָׁמַע', transliteration: 'shama', definition: 'To hear, listen, obey', language: 'hebrew' },
+  { id: 'H3068b', original: 'יָהּ', transliteration: 'Yah', definition: 'The Lord — shortened form of YHWH, used in praise (Hallelujah)', language: 'hebrew' },
+  { id: 'H982', original: 'בָּטַח', transliteration: 'batach', definition: 'To trust, be confident, rely upon', language: 'hebrew' },
+  { id: 'H7121', original: 'קָרָא', transliteration: 'qara', definition: 'To call, proclaim, read aloud, name', language: 'hebrew' },
+  { id: 'H3384', original: 'יָרָה', transliteration: 'yarah', definition: 'To throw, shoot, teach, instruct (root of Torah)', language: 'hebrew' },
+  { id: 'H1242', original: 'בֹּקֶר', transliteration: 'boqer', definition: 'Morning, daybreak, dawn', language: 'hebrew' },
+  { id: 'H3117', original: 'יוֹם', transliteration: 'yom', definition: 'Day, time, year — period of light or of time', language: 'hebrew' },
+  { id: 'H5971', original: 'עַם', transliteration: 'am', definition: 'People, nation, folk — often God\'s people', language: 'hebrew' },
+  // Greek additions
+  { id: 'G3341', original: 'μετάνοια', transliteration: 'metanoia', definition: 'Repentance, change of mind and heart', language: 'greek' },
+  { id: 'G1411', original: 'δύναμις', transliteration: 'dynamis', definition: 'Power, ability, might, miracle', language: 'greek' },
+  { id: 'G225', original: 'ἀλήθεια', transliteration: 'alētheia', definition: 'Truth, reality — that which is not hidden', language: 'greek' },
+  { id: 'G1391', original: 'δόξα', transliteration: 'doxa', definition: 'Glory, honour, praise, splendour', language: 'greek' },
+  { id: 'G2842', original: 'κοινωνία', transliteration: 'koinōnia', definition: 'Fellowship, communion, sharing, participation', language: 'greek' },
+  { id: 'G1654', original: 'ἐλεημοσύνη', transliteration: 'eleēmosynē', definition: 'Mercy, pity, alms, charitable giving', language: 'greek' },
+  { id: 'G3875', original: 'παράκλητος', transliteration: 'paraklētos', definition: 'Advocate, comforter, helper — the Holy Spirit', language: 'greek' },
+  { id: 'G652', original: 'ἀπόστολος', transliteration: 'apostolos', definition: 'Apostle, messenger, one sent forth', language: 'greek' },
+  { id: 'G908', original: 'βάπτισμα', transliteration: 'baptisma', definition: 'Baptism, immersion, ceremonial washing', language: 'greek' },
+  { id: 'G40', original: 'ἅγιος', transliteration: 'hagios', definition: 'Holy, sacred, set apart — of God\'s nature', language: 'greek' },
+  { id: 'G5590', original: 'ψυχή', transliteration: 'psychē', definition: 'Soul, life, self, mind — the inner person', language: 'greek' },
+  { id: 'G2588', original: 'καρδία', transliteration: 'kardia', definition: 'Heart — the centre of all physical and spiritual life', language: 'greek' },
+  { id: 'G4678', original: 'σοφία', transliteration: 'sophia', definition: 'Wisdom — broad knowledge and learning', language: 'greek' },
+  { id: 'G3952', original: 'παρουσία', transliteration: 'parousia', definition: 'Coming, arrival, presence — the Second Coming', language: 'greek' },
+  { id: 'G386', original: 'ἀνάστασις', transliteration: 'anastasis', definition: 'Resurrection, a rising from the dead', language: 'greek' },
+  { id: 'G1096', original: 'γίνομαι', transliteration: 'ginomai', definition: 'To become, come into being, be made, happen', language: 'greek' },
+  { id: 'G3588', original: 'ὁ, ἡ, τό', transliteration: 'ho, hē, to', definition: 'The definite article — the', language: 'greek' },
+  { id: 'G2041', original: 'ἔργον', transliteration: 'ergon', definition: 'Work, deed, labour, action', language: 'greek' },
+  { id: 'G2198', original: 'ζάω', transliteration: 'zaō', definition: 'To live, be alive — physical and spiritual life', language: 'greek' },
+  { id: 'G3709', original: 'ὀργή', transliteration: 'orgē', definition: 'Wrath, anger, indignation — righteous anger', language: 'greek' },
+  { id: 'G2288', original: 'θάνατος', transliteration: 'thanatos', definition: 'Death — physical and spiritual death', language: 'greek' },
+  { id: 'G1242', original: 'διαθήκη', transliteration: 'diathēkē', definition: 'Covenant, testament, will — a divine arrangement', language: 'greek' },
+  { id: 'G1588', original: 'ἐκλεκτός', transliteration: 'eklektos', definition: 'Chosen, elect, selected — God\'s chosen people', language: 'greek' },
+  { id: 'G2962', original: 'κύριος', transliteration: 'kyrios', definition: 'Lord, master, owner — a title for God and Christ', language: 'greek' },
+  { id: 'G4190', original: 'πονηρός', transliteration: 'ponēros', definition: 'Evil, wicked, bad — morally corrupt', language: 'greek' },
+];
+
+// Additional word-strongs verse mappings
+export const EXTENDED_WORD_MAPPINGS = [
+  // Psalm 119:105
+  [19,119,105,'lamp','H5216',4],
+  [19,119,105,'feet','H7272',6],
+  [19,119,105,'light','H216',8],
+  [19,119,105,'path','H5410',10],
+  // Proverbs 3:5-6
+  [20,3,5,'Trust','H982',1],
+  [20,3,5,'LORD','H3068',4],
+  [20,3,5,'heart','H3820',7],
+  [20,3,6,'ways','H1870',3],
+  // Isaiah 53:5
+  [23,53,5,'wounded','H2490',3],
+  [23,53,5,'transgressions','H6588',5],
+  [23,53,5,'peace','H7965',9],
+  [23,53,5,'healed','H7495',16],
+  // Romans 8:28
+  [45,8,28,'God','G2316',6],
+  [45,8,28,'love','G26',2],
+  [45,8,28,'good','G18',9],
+  // Ephesians 2:8-9
+  [49,2,8,'saved','G4982',4],
+  [49,2,9,'works','G2041',4],
+  // 1 Corinthians 13:13
+  [46,13,13,'faith','G4102',4],
+  [46,13,13,'hope','G1680',5],
+  [46,13,13,'love','G26',6],
+  // John 1:1 expanded
+  [43,1,1,'beginning','G746',4],
+  [43,1,14,'flesh','G4561',4],
+  [43,1,14,'glory','G1391',10],
+  [43,1,14,'grace','G5485',14],
+  [43,1,14,'truth','G225',16],
+  // Revelation 21:1
+  [66,21,1,'heaven','G3772',3],
+  [66,21,1,'earth','G1093',6],
+  // Matthew 28:19
+  [40,28,19,'nations','G1484',5],
+  [40,28,19,'baptizing','G907',6],
+  [40,28,19,'Father','G3962',11],
+  // Matthew 5:3-10 Beatitudes
+  [40,5,3,'blessed','G3107',1],
+  [40,5,3,'kingdom','G932',8],
+  [40,5,3,'heaven','G3772',10],
+  [40,5,4,'blessed','G3107',1],
+  [40,5,6,'righteousness','G1343',8],
+  // Hebrews 11:1
+  [58,11,1,'faith','G4102',2],
+  [58,11,1,'hope','G1679',8],
+  // Genesis 1:1 expanded
+  [1,1,1,'beginning','H7225',2],
+  [1,1,2,'Spirit','H7307',3],
+  [1,1,3,'light','H216',4],
+  // Deuteronomy 6:4 (Shema)
+  [5,6,4,'LORD','H3068',3],
+  [5,6,4,'God','H430',5],
+  [5,6,5,'love','H157',2],
+  [5,6,5,'heart','H3820',6],
+  [5,6,5,'soul','H5315',8],
+];

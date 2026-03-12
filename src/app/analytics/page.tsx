@@ -118,6 +118,7 @@ export default function AnalyticsPage({ searchParams }: Props) {
           timeline={timeline}
           bookName={bookName || 'All Books'}
           sentBookName={getBookById(sentBook)?.name || 'Genesis'}
+          bookId={bookId}
         />
       </main>
     </>
