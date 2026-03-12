@@ -2,12 +2,24 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import VerseDisplay from '@/components/VerseDisplay';
+import KeyboardNav from '@/components/KeyboardNav';
 import { getBookBySlug, getBookById, BIBLE_BOOKS } from '@/lib/bible-books';
 import { getDb } from '@/lib/db';
+
+import type { Metadata } from 'next';
 
 interface Props {
   params: { book: string; chapter: string };
   searchParams: { translations?: string };
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const bookInfo = getBookBySlug(params.book);
+  const title = bookInfo ? `${bookInfo.name} ${params.chapter} — BibleLens` : 'BibleLens';
+  return {
+    title,
+    description: bookInfo ? `Read ${bookInfo.name} chapter ${params.chapter} with multi-translation comparison, Strong's concordance, and cross-references.` : undefined,
+  };
 }
 
 export default function ReaderPage({ params, searchParams }: Props) {
@@ -181,6 +193,15 @@ export default function ReaderPage({ params, searchParams }: Props) {
             ) : null}
           </div>
         </div>
+
+        <KeyboardNav
+          bookSlug={params.book}
+          chapter={chapter}
+          maxChapter={bookInfo.chapters}
+          prevBookSlug={prevBook ? prevBook.name.toLowerCase().replace(/ /g, '-') : undefined}
+          prevBookMaxChapter={prevBook?.chapters}
+          nextBookSlug={nextBook ? nextBook.name.toLowerCase().replace(/ /g, '-') : undefined}
+        />
       </main>
     </>
   );

@@ -68,7 +68,7 @@ export default function Sidebar() {
         </div>
 
         <nav className="p-2">
-          <div className="grid grid-cols-2 gap-2 mb-3 px-2">
+          <div className="grid grid-cols-2 gap-1.5 mb-3 px-2">
             <Link href="/search" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
               🔍 Search
             </Link>
@@ -86,6 +86,12 @@ export default function Sidebar() {
             </Link>
             <Link href="/verse-of-the-day" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
               ✨ Daily
+            </Link>
+            <Link href="/parallels" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              🔀 Parallels
+            </Link>
+            <Link href="/bookmarks" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              📑 Bookmarks
             </Link>
           </div>
 

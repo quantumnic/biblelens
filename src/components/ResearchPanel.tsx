@@ -92,6 +92,12 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     { name: 'Perseus Digital Library', url: `https://www.perseus.tufts.edu/hopper/searchresults?q=${encodeURIComponent(bookName || '')}`, icon: '🏛️', desc: 'Greek & Latin texts' },
     { name: 'INTF (NT Manuscripts)', url: 'https://ntvmr.uni-muenster.de/home', icon: '📜', desc: 'NT manuscript transcripts' },
     { name: 'Logeion', url: `https://logeion.uchicago.edu/`, icon: '📕', desc: 'Greek & Latin lexicon' },
+    { name: 'Internet Archive', url: `https://archive.org/search?query=${encodeURIComponent(searchQuery + ' biblical commentary')}`, icon: '📚', desc: 'Historical commentaries (free)' },
+    { name: 'Dead Sea Scrolls', url: `https://www.deadseascrolls.org.il/explore-the-archive`, icon: '🏺', desc: 'DSS digital archive' },
+    { name: 'Tyndale House', url: `https://tyndalehouselibrary.com/`, icon: '🏠', desc: 'Cambridge biblical research' },
+    { name: 'ORCID (scholars)', url: `https://orcid.org/orcid-search/search?searchQuery=${encodeURIComponent('biblical ' + (bookName || ''))}`, icon: '👤', desc: 'Find biblical scholars' },
+    { name: 'Aleppo Codex', url: 'https://www.aleppocodex.org/', icon: '📖', desc: 'Oldest complete Hebrew Bible' },
+    { name: 'Early Church Texts', url: 'https://www.earlychurchtexts.com/', icon: '⛪', desc: 'Patristic writings' },
   ];
 
   return (
