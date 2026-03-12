@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { handleApiError } from '@/lib/api-utils';
 
 // Curated list of notable verses for verse-of-the-day rotation
 const NOTABLE_VERSES: [number, number, number][] = [
@@ -30,6 +31,7 @@ const NOTABLE_VERSES: [number, number, number][] = [
 ];
 
 export async function GET(request: NextRequest) {
+  try {
   const { searchParams } = new URL(request.url);
   const dateStr = searchParams.get('date');
 
@@ -53,4 +55,7 @@ export async function GET(request: NextRequest) {
     book, chapter, verse, texts,
     date: now.toISOString().split('T')[0],
   });
+  } catch (error) {
+    return handleApiError(error);
+  }
 }

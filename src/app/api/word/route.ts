@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { handleApiError } from '@/lib/api-utils';
 
 export async function GET(request: NextRequest) {
+  try {
   const { searchParams } = new URL(request.url);
   const strongs = searchParams.get('strongs');
   const book = searchParams.get('book');
@@ -45,4 +47,7 @@ export async function GET(request: NextRequest) {
   // List all Strong's entries
   const all = db.prepare('SELECT id, original, transliteration, language FROM strongs ORDER BY id').all();
   return NextResponse.json({ entries: all });
+  } catch (error) {
+    return handleApiError(error);
+  }
 }

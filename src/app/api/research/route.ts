@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { handleApiError } from '@/lib/api-utils';
 
 export async function GET(request: NextRequest) {
+  try {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get('q');
   const source = searchParams.get('source') || 'semanticscholar';
@@ -67,4 +69,7 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed' }, { status: 400 });
+  } catch (error) {
+    return handleApiError(error);
+  }
 }

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { handleApiError } from '@/lib/api-utils';
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
   const db = getDb();
   const id = parseInt(params.id);
 
@@ -37,4 +39,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     children: children.map(parse),
     siblings: siblings.map(parse),
   });
+  } catch (error) {
+    return handleApiError(error);
+  }
 }

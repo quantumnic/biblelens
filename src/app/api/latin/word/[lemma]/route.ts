@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { handleApiError } from '@/lib/api-utils';
 
 export async function GET(request: NextRequest, { params }: { params: { lemma: string } }) {
+  try {
   const db = getDb();
   const lemma = decodeURIComponent(params.lemma).toLowerCase();
 
@@ -38,4 +40,7 @@ export async function GET(request: NextRequest, { params }: { params: { lemma: s
       ref: `${o.book}:${o.chapter}:${o.verse}`,
     })),
   });
+  } catch (error) {
+    return handleApiError(error);
+  }
 }

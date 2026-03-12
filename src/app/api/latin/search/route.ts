@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { handleApiError } from '@/lib/api-utils';
 
 export async function GET(request: NextRequest) {
+  try {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get('q')?.toLowerCase();
   if (!q) return NextResponse.json({ error: 'q parameter required' }, { status: 400 });
@@ -22,4 +24,7 @@ export async function GET(request: NextRequest) {
     textual_variants: JSON.parse(w.textual_variants || '[]'),
     academic_refs: JSON.parse(w.academic_refs || '{}'),
   })));
+  } catch (error) {
+    return handleApiError(error);
+  }
 }

@@ -4,6 +4,8 @@ import { getDb } from '@/lib/db';
 import { getBookById, BIBLE_BOOKS } from '@/lib/bible-books';
 import AnalyticsCharts from '@/components/AnalyticsCharts';
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
   searchParams: { book?: string };
 }

@@ -34,11 +34,33 @@ interface ScrollmapperBible {
   books: { name: string; chapters: { chapter: number; verses: { verse: number; text: string }[] }[] }[];
 }
 
+async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function downloadWithRetry<T>(url: string, maxRetries = 3): Promise<T> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`  Downloading ${url}${attempt > 1 ? ` (attempt ${attempt}/${maxRetries})` : ''}...`);
+      const { data } = await axios.get(url, { timeout: 30000 });
+      return data;
+    } catch (error: any) {
+      const msg = error?.message || String(error);
+      if (attempt === maxRetries) {
+        console.error(`  ❌ Failed after ${maxRetries} attempts: ${msg}`);
+        throw error;
+      }
+      const delay = attempt * 2000;
+      console.warn(`  ⚠️  Attempt ${attempt} failed (${msg}), retrying in ${delay / 1000}s...`);
+      await sleep(delay);
+    }
+  }
+  throw new Error('Unreachable');
+}
+
 async function downloadBible(filename: string): Promise<ScrollmapperBible> {
   const url = `${BASE_URL}/json/${filename}`;
-  console.log(`  Downloading ${url}...`);
-  const { data } = await axios.get(url);
-  return data;
+  return downloadWithRetry<ScrollmapperBible>(url);
 }
 
 function flattenBible(bible: ScrollmapperBible): { book: number; chapter: number; verse: number; text: string }[] {
@@ -56,8 +78,16 @@ function flattenBible(bible: ScrollmapperBible): { book: number; chapter: number
 }
 
 async function main() {
+  console.log('🔧 BibleLens Database Seeder');
+  console.log('============================\n');
+  const startTime = Date.now();
+
+  console.log(`📂 Data directory: ${DATA_DIR}`);
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  if (fs.existsSync(DB_PATH)) fs.unlinkSync(DB_PATH);
+  if (fs.existsSync(DB_PATH)) {
+    console.log('🗑️  Removing existing database...');
+    fs.unlinkSync(DB_PATH);
+  }
 
   const db = new Database(DB_PATH);
   db.pragma('journal_mode = WAL');
@@ -475,7 +505,8 @@ async function main() {
   console.log(`  Latin word occurrences counted.`);
 
   db.close();
-  console.log('\n✅ Database seeded successfully!');
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  console.log(`\n✅ Database seeded successfully in ${elapsed}s!`);
 
   const statsDb = new Database(DB_PATH, { readonly: true });
   const verseCount = statsDb.prepare('SELECT COUNT(*) as c FROM verses').get() as any;
@@ -489,4 +520,8 @@ async function main() {
   statsDb.close();
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error('\n❌ Seeding failed:', error?.message || error);
+  console.error('   Try running again — downloads may have timed out.');
+  process.exit(1);
+});

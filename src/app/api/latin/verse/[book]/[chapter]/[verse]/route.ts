@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { handleApiError } from '@/lib/api-utils';
 
 export async function GET(request: NextRequest, { params }: { params: { book: string; chapter: string; verse: string } }) {
+  try {
   const db = getDb();
   const book = parseInt(params.book);
   const chapter = parseInt(params.chapter);
@@ -39,4 +41,7 @@ export async function GET(request: NextRequest, { params }: { params: { book: st
   });
 
   return NextResponse.json({ book, chapter, verse, text: vulVerse.text, words: result });
+  } catch (error) {
+    return handleApiError(error);
+  }
 }

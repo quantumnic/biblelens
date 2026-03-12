@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { handleApiError } from '@/lib/api-utils';
 
 const THEMES: Record<string, string[]> = {
   'Salvation': ['salvation','save','saved','saviour','redeem','redeemed','redemption','deliver','deliverance','ransom'],
@@ -20,6 +21,7 @@ const THEMES: Record<string, string[]> = {
 };
 
 export async function GET(request: NextRequest) {
+  try {
   const { searchParams } = new URL(request.url);
   const book = searchParams.get('book');
   const translation = searchParams.get('translation') || 'KJV';
@@ -69,4 +71,7 @@ export async function GET(request: NextRequest) {
     .map(([theme, stats]) => ({ theme, ...stats }));
 
   return NextResponse.json({ type: 'theological-themes', data: sorted });
+  } catch (error) {
+    return handleApiError(error);
+  }
 }

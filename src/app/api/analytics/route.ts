@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { handleApiError } from '@/lib/api-utils';
 
 // Stop words to exclude from frequency analysis
 const STOP_WORDS = new Set([
@@ -21,6 +22,7 @@ const STOP_WORDS = new Set([
 ]);
 
 export async function GET(request: NextRequest) {
+  try {
   const { searchParams } = new URL(request.url);
   const type = searchParams.get('type') || 'word-frequency';
   const book = searchParams.get('book');
@@ -125,4 +127,7 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({ error: 'Unknown analytics type' }, { status: 400 });
+  } catch (error) {
+    return handleApiError(error);
+  }
 }

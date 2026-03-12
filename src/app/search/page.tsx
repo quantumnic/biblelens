@@ -2,6 +2,8 @@ import Sidebar from '@/components/Sidebar';
 import Link from 'next/link';
 import { getBookById, BIBLE_BOOKS } from '@/lib/bible-books';
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
   searchParams: { q?: string; book?: string; testament?: string; translation?: string; offset?: string };
 }

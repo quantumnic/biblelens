@@ -3,6 +3,8 @@ import { getDb } from '@/lib/db';
 import { getBookById, BIBLE_BOOKS } from '@/lib/bible-books';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
   searchParams: { book?: string; chapter?: string; verse?: string };
 }

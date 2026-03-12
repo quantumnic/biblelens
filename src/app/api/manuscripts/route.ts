@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { handleApiError } from '@/lib/api-utils';
 
 // Curated manuscript attestation data
 // In reality, this would be a full database. This is a representative demo.
@@ -147,6 +148,7 @@ function getManuscriptsForVerse(book: number, _chapter: number, _verse: number):
 }
 
 export async function GET(request: NextRequest) {
+  try {
   const { searchParams } = new URL(request.url);
   const book = searchParams.get('book');
   const chapter = searchParams.get('chapter');
@@ -161,4 +163,7 @@ export async function GET(request: NextRequest) {
   
   // Return all manuscripts
   return NextResponse.json({ manuscripts: MANUSCRIPTS });
+  } catch (error) {
+    return handleApiError(error);
+  }
 }

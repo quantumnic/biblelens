@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { handleApiError } from '@/lib/api-utils';
 
 export async function GET(request: NextRequest) {
+  try {
   const { searchParams } = new URL(request.url);
   const book = searchParams.get('book');
   const translation = searchParams.get('translation') || 'KJV';
@@ -66,4 +68,7 @@ export async function GET(request: NextRequest) {
     totalUniqueWords: Object.keys(freq).length,
     data: hapax,
   });
+  } catch (error) {
+    return handleApiError(error);
+  }
 }

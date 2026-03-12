@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { handleApiError } from '@/lib/api-utils';
 
 export async function GET(request: NextRequest) {
+  try {
   const { searchParams } = new URL(request.url);
   const book = searchParams.get('book');
   const chapter = searchParams.get('chapter');
@@ -49,4 +51,7 @@ export async function GET(request: NextRequest) {
     to: enrichRefs(toRefs),
     total: fromRefs.length + toRefs.length
   });
+  } catch (error) {
+    return handleApiError(error);
+  }
 }

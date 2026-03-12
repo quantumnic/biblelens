@@ -1,7 +1,9 @@
 import Sidebar from '@/components/Sidebar';
 import Link from 'next/link';
-import { getDb } from '@/lib/db';
+import { getDb, isDatabaseAvailable } from '@/lib/db';
 import { getBookById } from '@/lib/bible-books';
+
+export const dynamic = 'force-dynamic';
 
 // Same curated list as the API
 const NOTABLE_VERSES: [number, number, number][] = [
