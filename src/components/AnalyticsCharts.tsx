@@ -210,6 +210,40 @@ export default function AnalyticsCharts({ topWords, sentimentData, bookStats, ti
         </section>
       )}
 
+      {/* Reading Time Estimates */}
+      <section className="bg-parchment-900 border border-parchment-800 rounded-2xl p-5">
+        <h2 className="text-lg font-semibold text-parchment-100 mb-1">⏱️ Estimated Reading Time</h2>
+        <p className="text-xs text-parchment-500 mb-4">Based on ~200 words per minute (careful reading pace)</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+          {(() => {
+            const totalChars = bookStats.reduce((s, b) => s + b.chars, 0);
+            const totalWords = Math.round(totalChars / 5.5); // avg word length
+            const totalHours = Math.round(totalWords / 200 / 60);
+            const otChars = bookStats.filter(b => b.testament === 'OT').reduce((s, b) => s + b.chars, 0);
+            const otHours = Math.round(Math.round(otChars / 5.5) / 200 / 60);
+            const ntChars = bookStats.filter(b => b.testament === 'NT').reduce((s, b) => s + b.chars, 0);
+            const ntHours = Math.round(Math.round(ntChars / 5.5) / 200 / 60);
+            const topBooks = [...bookStats].sort((a, b) => b.chars - a.chars).slice(0, 5);
+            return [
+              { label: 'Entire Bible', value: `~${totalHours}h`, sub: `${totalWords.toLocaleString()} words` },
+              { label: 'Old Testament', value: `~${otHours}h`, sub: `${bookStats.filter(b => b.testament === 'OT').length} books` },
+              { label: 'New Testament', value: `~${ntHours}h`, sub: `${bookStats.filter(b => b.testament === 'NT').length} books` },
+              ...topBooks.map(b => ({
+                label: b.name,
+                value: `~${Math.max(1, Math.round(Math.round(b.chars / 5.5) / 200))}min`,
+                sub: `${b.verses} verses`,
+              })),
+            ].map(item => (
+              <div key={item.label} className="bg-parchment-800 rounded-lg p-3 text-center">
+                <div className="text-lg font-bold text-gold-400">{item.value}</div>
+                <div className="text-xs text-parchment-200 font-medium">{item.label}</div>
+                <div className="text-xs text-parchment-500">{item.sub}</div>
+              </div>
+            ));
+          })()}
+        </div>
+      </section>
+
       {/* Quick Stats */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[

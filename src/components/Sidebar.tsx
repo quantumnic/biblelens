@@ -93,6 +93,9 @@ export default function Sidebar() {
             <Link href="/bookmarks" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
               📑 Bookmarks
             </Link>
+            <Link href="/timeline" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              📅 Timeline
+            </Link>
           </div>
 
           <div className="mb-2">

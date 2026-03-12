@@ -22,11 +22,34 @@ interface PubMedResult {
   url: string;
 }
 
+interface OpenLibResult {
+  key: string;
+  title: string;
+  authors: string[];
+  year: number | null;
+  subjects: string[];
+  url: string;
+  pages: number | null;
+  publisher: string | null;
+}
+
+interface CrossRefResult {
+  doi: string;
+  title: string;
+  authors: string[];
+  year: number | null;
+  journal: string;
+  abstract: string | null;
+  url: string;
+}
+
 export default function ResearchPanel({ book, chapter, verse }: { book: number; chapter: number; verse: number }) {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [pubmed, setPubmed] = useState<PubMedResult[]>([]);
+  const [openlib, setOpenlib] = useState<OpenLibResult[]>([]);
+  const [crossref, setCrossref] = useState<CrossRefResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'ai' | 'scholar' | 'pubmed' | 'resources'>('ai');
+  const [activeTab, setActiveTab] = useState<'ai' | 'scholar' | 'pubmed' | 'books' | 'crossref' | 'resources'>('ai');
 
   const bookInfo = getBookById(book);
   const bookName = bookInfo?.name || '';
@@ -55,9 +78,33 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     setLoading(false);
   };
 
+  const fetchOpenLib = async () => {
+    if (openlib.length > 0) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/research?q=${encodeURIComponent(bookName + ' bible commentary')}&source=openlibrary&limit=10`);
+      const data = await res.json();
+      setOpenlib(data.results || []);
+    } catch { /* ignore */ }
+    setLoading(false);
+  };
+
+  const fetchCrossRef = async () => {
+    if (crossref.length > 0) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/research?q=${encodeURIComponent(searchQuery + ' biblical exegesis')}&source=crossref&limit=8`);
+      const data = await res.json();
+      setCrossref(data.results || []);
+    } catch { /* ignore */ }
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (activeTab === 'scholar') fetchScholar();
     if (activeTab === 'pubmed') fetchPubMed();
+    if (activeTab === 'books') fetchOpenLib();
+    if (activeTab === 'crossref') fetchCrossRef();
   }, [activeTab]);
 
   // AI research queries
@@ -103,8 +150,8 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
   return (
     <div className="space-y-3">
       {/* Tab bar */}
-      <div className="flex gap-1 bg-parchment-800 rounded-lg p-1">
-        {([['ai', '🤖 AI'], ['scholar', '🎓 Scholar'], ['pubmed', '🏥 PubMed'], ['resources', '🔗 Links']] as const).map(([key, label]) => (
+      <div className="flex gap-1 bg-parchment-800 rounded-lg p-1 overflow-x-auto">
+        {([['ai', '🤖 AI'], ['scholar', '🎓 Scholar'], ['pubmed', '🏥 PubMed'], ['books', '📚 Books'], ['crossref', '🔗 CrossRef'], ['resources', '📌 Links']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
@@ -189,6 +236,72 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
               </div>
               {p.authors.length > 0 && (
                 <p className="text-xs text-parchment-500 mt-1">{p.authors.slice(0, 3).join(', ')}{p.authors.length > 3 ? ' et al.' : ''}</p>
+              )}
+            </a>
+          ))}
+        </div>
+      )}
+
+      {/* OpenLibrary Books Tab */}
+      {activeTab === 'books' && (
+        <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+          {loading && <div className="text-parchment-500 text-sm animate-pulse">Searching OpenLibrary…</div>}
+          {!loading && openlib.length === 0 && <div className="text-parchment-500 text-sm">No books found.</div>}
+          {openlib.map((b, i) => (
+            <a
+              key={i}
+              href={b.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block p-3 rounded-lg bg-parchment-800 hover:bg-parchment-700 transition-colors"
+            >
+              <h4 className="text-sm text-parchment-100 font-medium leading-tight">{b.title}</h4>
+              <div className="flex gap-3 mt-1 text-xs text-parchment-500">
+                {b.year && <span>📅 {b.year}</span>}
+                {b.publisher && <span>🏢 {b.publisher}</span>}
+                {b.pages && <span>📄 {b.pages}p</span>}
+              </div>
+              {b.authors.length > 0 && (
+                <p className="text-xs text-parchment-500 mt-1">{b.authors.slice(0, 3).join(', ')}{b.authors.length > 3 ? ' et al.' : ''}</p>
+              )}
+              {b.subjects.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {b.subjects.slice(0, 4).map((s, j) => (
+                    <span key={j} className="text-xs px-1.5 py-0.5 rounded bg-parchment-700 text-parchment-400">{s}</span>
+                  ))}
+                </div>
+              )}
+            </a>
+          ))}
+        </div>
+      )}
+
+      {/* CrossRef Tab */}
+      {activeTab === 'crossref' && (
+        <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+          {loading && <div className="text-parchment-500 text-sm animate-pulse">Searching CrossRef…</div>}
+          {!loading && crossref.length === 0 && <div className="text-parchment-500 text-sm">No articles found.</div>}
+          {crossref.map((c, i) => (
+            <a
+              key={i}
+              href={c.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block p-3 rounded-lg bg-parchment-800 hover:bg-parchment-700 transition-colors"
+            >
+              <h4 className="text-sm text-parchment-100 font-medium leading-tight">{c.title}</h4>
+              <div className="flex gap-3 mt-1 text-xs text-parchment-500">
+                {c.year && <span>📅 {c.year}</span>}
+                {c.journal && <span>📰 {c.journal}</span>}
+              </div>
+              {c.authors.length > 0 && (
+                <p className="text-xs text-parchment-500 mt-1">{c.authors.slice(0, 3).join(', ')}{c.authors.length > 3 ? ' et al.' : ''}</p>
+              )}
+              {c.abstract && (
+                <p className="text-xs text-parchment-400 mt-2 line-clamp-2">{c.abstract}</p>
+              )}
+              {c.doi && (
+                <p className="text-xs text-parchment-600 mt-1 font-mono">DOI: {c.doi}</p>
               )}
             </a>
           ))}

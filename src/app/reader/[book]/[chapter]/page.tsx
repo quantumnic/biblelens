@@ -88,6 +88,11 @@ export default function ReaderPage({ params, searchParams }: Props) {
     'SELECT DISTINCT translation FROM verses ORDER BY translation'
   ).all() as { translation: string }[];
 
+  // Reading time estimate (avg 200 wpm for careful reading)
+  const kjvVerses = verses.filter((v: any) => v.translation === selectedTranslations[0]);
+  const totalWords = kjvVerses.reduce((sum: number, v: any) => sum + v.text.split(/\s+/).length, 0);
+  const readingTimeMin = Math.max(1, Math.round(totalWords / 200));
+
   // Prev/Next chapter
   const prevChapter = chapter > 1 ? chapter - 1 : null;
   const nextChapter = chapter < bookInfo.chapters ? chapter + 1 : null;
@@ -112,9 +117,18 @@ export default function ReaderPage({ params, searchParams }: Props) {
           </div>
           
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <h1 className="text-3xl font-bold font-serif text-parchment-100">
-              {bookInfo.name} <span className="text-gold-400">{chapter}</span>
-            </h1>
+            <div>
+              <h1 className="text-3xl font-bold font-serif text-parchment-100">
+                {bookInfo.name} <span className="text-gold-400">{chapter}</span>
+              </h1>
+              <div className="flex items-center gap-3 mt-1 text-xs text-parchment-500">
+                <span>📖 {kjvVerses.length} verses</span>
+                <span>•</span>
+                <span>⏱️ ~{readingTimeMin} min read</span>
+                <span>•</span>
+                <span>📝 {totalWords.toLocaleString()} words</span>
+              </div>
+            </div>
             
             {/* Translation selector */}
             <div className="flex flex-wrap gap-2">

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import ScrollToTop from '@/components/ScrollToTop';
+import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
   title: 'BibleLens — Analytical Bible Study Tool',
@@ -30,6 +31,7 @@ export default function RootLayout({
         <div className="flex min-h-screen">
           {children}
         </div>
+        <Footer />
         <ScrollToTop />
       </body>
     </html>

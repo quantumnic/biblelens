@@ -3,6 +3,7 @@ import axios from 'axios';
 import path from 'path';
 import fs from 'fs';
 import { EXTENDED_STRONGS_V2, EXTENDED_WORD_MAPPINGS_V2 } from './strongs-extended-v2';
+import { EXTENDED_STRONGS_V3, EXTENDED_WORD_MAPPINGS_V3 } from './strongs-extended-v3';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DB_PATH = path.join(DATA_DIR, 'bible.db');
@@ -388,8 +389,9 @@ async function main() {
     for (const s of strongsData) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
     for (const s of extendedStrongs) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
     for (const s of EXTENDED_STRONGS_V2) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
+    for (const s of EXTENDED_STRONGS_V3) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
   })();
-  console.log(`Strong's concordance seeded: ${strongsData.length + extendedStrongs.length + EXTENDED_STRONGS_V2.length} entries.`);
+  console.log(`Strong's concordance seeded: ${strongsData.length + extendedStrongs.length + EXTENDED_STRONGS_V2.length + EXTENDED_STRONGS_V3.length} entries.`);
 
   // Word-strongs mappings
   const insertWordStrong = db.prepare('INSERT OR IGNORE INTO word_strongs (book, chapter, verse, word, strongs_id, position) VALUES (?, ?, ?, ?, ?, ?)');
@@ -423,6 +425,9 @@ async function main() {
       insertWordStrong.run(book, ch, v, word, sid, pos);
     }
     for (const [book,ch,v,word,sid,pos] of EXTENDED_WORD_MAPPINGS_V2) {
+      insertWordStrong.run(book, ch, v, word, sid, pos);
+    }
+    for (const [book,ch,v,word,sid,pos] of EXTENDED_WORD_MAPPINGS_V3) {
       insertWordStrong.run(book, ch, v, word, sid, pos);
     }
   })();

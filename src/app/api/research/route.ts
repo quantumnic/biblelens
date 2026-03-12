@@ -68,7 +68,73 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed' }, { status: 400 });
+  if (source === 'openlibrary') {
+    try {
+      const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=${limit}&fields=key,title,author_name,first_publish_year,subject,isbn,number_of_pages_median,publisher`;
+      const res = await fetch(url, { next: { revalidate: 3600 } });
+
+      if (!res.ok) {
+        return NextResponse.json({ error: 'OpenLibrary API error', status: res.status }, { status: 502 });
+      }
+
+      const data = await res.json();
+      const results = (data.docs || []).map((doc: any) => ({
+        key: doc.key,
+        title: doc.title,
+        authors: doc.author_name || [],
+        year: doc.first_publish_year,
+        subjects: (doc.subject || []).slice(0, 5),
+        isbn: doc.isbn?.[0] || null,
+        pages: doc.number_of_pages_median || null,
+        publisher: doc.publisher?.[0] || null,
+        url: `https://openlibrary.org${doc.key}`,
+      }));
+
+      return NextResponse.json({
+        source: 'openlibrary',
+        results,
+        total: data.numFound || 0,
+      });
+    } catch (e: any) {
+      return NextResponse.json({ error: 'Failed to query OpenLibrary', details: e.message }, { status: 500 });
+    }
+  }
+
+  if (source === 'crossref') {
+    try {
+      const url = `https://api.crossref.org/works?query=${encodeURIComponent(query)}&rows=${limit}&select=DOI,title,author,published-print,container-title,abstract,URL`;
+      const res = await fetch(url, {
+        headers: { 'User-Agent': 'BibleLens/1.0 (biblelens@research)' },
+        next: { revalidate: 3600 },
+      });
+
+      if (!res.ok) {
+        return NextResponse.json({ error: 'CrossRef API error', status: res.status }, { status: 502 });
+      }
+
+      const data = await res.json();
+      const items = data.message?.items || [];
+      const results = items.map((item: any) => ({
+        doi: item.DOI,
+        title: item.title?.[0] || '',
+        authors: (item.author || []).map((a: any) => `${a.given || ''} ${a.family || ''}`.trim()),
+        year: item['published-print']?.['date-parts']?.[0]?.[0] || null,
+        journal: item['container-title']?.[0] || '',
+        abstract: item.abstract?.replace(/<[^>]*>/g, '').slice(0, 300) || null,
+        url: item.URL || `https://doi.org/${item.DOI}`,
+      }));
+
+      return NextResponse.json({
+        source: 'crossref',
+        results,
+        total: data.message?.['total-results'] || 0,
+      });
+    } catch (e: any) {
+      return NextResponse.json({ error: 'Failed to query CrossRef', details: e.message }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref' }, { status: 400 });
   } catch (error) {
     return handleApiError(error);
   }
