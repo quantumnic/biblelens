@@ -190,6 +190,16 @@ export default function Home() {
             <p className="text-sm text-parchment-200 mt-2 font-semibold">Key Persons</p>
             <p className="text-xs text-parchment-500 mt-0.5">Biblical figures</p>
           </Link>
+          <Link href="/parables" className="p-4 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all text-center group">
+            <span className="text-2xl group-hover:scale-110 inline-block transition-transform">🌾</span>
+            <p className="text-sm text-parchment-200 mt-2 font-semibold">Parables</p>
+            <p className="text-xs text-parchment-500 mt-0.5">Jesus&apos;s teachings</p>
+          </Link>
+          <Link href="/typology" className="p-4 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all text-center group">
+            <span className="text-2xl group-hover:scale-110 inline-block transition-transform">🔗</span>
+            <p className="text-sm text-parchment-200 mt-2 font-semibold">Typology</p>
+            <p className="text-xs text-parchment-500 mt-0.5">OT → NT connections</p>
+          </Link>
         </div>
 
         {/* Popular Passages */}

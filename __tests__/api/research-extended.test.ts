@@ -75,12 +75,43 @@ describe('GET /api/research — extended sources', () => {
     expect(data.results[0].abstract).not.toContain('<p>');
   });
 
+  it('handles doaj source', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        total: 1,
+        results: [{
+          id: 'doaj-123',
+          bibjson: {
+            title: 'Open Access Biblical Research',
+            author: [{ name: 'Dr. Maria Schmidt' }],
+            year: '2023',
+            journal: { title: 'Journal of Open Theology' },
+            abstract: 'An open access study on hermeneutics.',
+            identifier: [{ type: 'doi', id: '10.5678/doaj-test' }],
+            link: [{ type: 'fulltext', url: 'https://example.com/article' }],
+            keywords: ['hermeneutics', 'biblical studies'],
+          },
+        }],
+      }),
+    });
+
+    const req = new NextRequest('http://localhost/api/research?q=hermeneutics&source=doaj');
+    const res = await GET(req);
+    const data = await res.json();
+    expect(res.status).toBe(200);
+    expect(data.source).toBe('doaj');
+    expect(data.results).toHaveLength(1);
+    expect(data.results[0].title).toBe('Open Access Biblical Research');
+    expect(data.results[0].doi).toBe('10.5678/doaj-test');
+    expect(data.results[0].keywords).toContain('hermeneutics');
+  });
+
   it('rejects unknown sources with updated message', async () => {
     const req = new NextRequest('http://localhost/api/research?q=test&source=unknown');
     const res = await GET(req);
     const data = await res.json();
     expect(res.status).toBe(400);
-    expect(data.error).toContain('openlibrary');
-    expect(data.error).toContain('crossref');
+    expect(data.error).toContain('doaj');
   });
 });

@@ -18,6 +18,14 @@ const THEMES: Record<string, string[]> = {
   'Resurrection': ['resurrection','risen','raised','rise','arose','alive'],
   'Worship': ['worship','praise','praising','glorify','glory','magnify','exalt','thanksgiving','hymn'],
   'Suffering': ['suffer','suffering','affliction','tribulation','persecution','trial','temptation','trouble'],
+  'Creation': ['create','created','creation','maker','formed','earth','heaven','world','beginning','foundation'],
+  'Angels': ['angel','angels','seraphim','cherubim','archangel','heavenly','host','messenger'],
+  'Baptism': ['baptize','baptized','baptism','immerse','wash','washed','washing','water'],
+  'Communion': ['bread','wine','cup','supper','table','feast','eat','drink','body','blood'],
+  'Family': ['father','mother','son','daughter','children','brother','sister','husband','wife','marriage'],
+  'Hope': ['hope','hoped','hoping','hopeth','expectation','wait','waited','waiting','endure','endurance'],
+  'Joy': ['joy','joyful','rejoice','rejoiced','glad','gladness','delight','merry','happy','blessed'],
+  'Death': ['death','die','died','dead','grave','tomb','burial','perish','destroy','slain'],
 };
 
 export async function GET(request: NextRequest) {

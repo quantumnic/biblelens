@@ -184,7 +184,45 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex' }, { status: 400 });
+  if (source === 'doaj') {
+    try {
+      const url = `https://doaj.org/api/search/articles/${encodeURIComponent(query)}?page=1&pageSize=${limit}`;
+      const res = await fetch(url, {
+        headers: { 'Accept': 'application/json' },
+        next: { revalidate: 3600 },
+      });
+
+      if (!res.ok) {
+        return NextResponse.json({ error: 'DOAJ API error', status: res.status }, { status: 502 });
+      }
+
+      const data = await res.json();
+      const results = (data.results || []).map((item: any) => {
+        const bib = item.bibjson || {};
+        return {
+          id: item.id,
+          doi: bib.identifier?.find((i: any) => i.type === 'doi')?.id || null,
+          title: bib.title || '',
+          authors: (bib.author || []).map((a: any) => a.name || ''),
+          year: bib.year || null,
+          journal: bib.journal?.title || '',
+          abstract: (bib.abstract || '').slice(0, 400) || null,
+          url: bib.link?.find((l: any) => l.type === 'fulltext')?.url || `https://doaj.org/article/${item.id}`,
+          keywords: bib.keywords || [],
+        };
+      });
+
+      return NextResponse.json({
+        source: 'doaj',
+        results,
+        total: data.total || 0,
+      });
+    } catch (e: any) {
+      return NextResponse.json({ error: 'Failed to query DOAJ', details: e.message }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex, doaj' }, { status: 400 });
   } catch (error) {
     return handleApiError(error);
   }

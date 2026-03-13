@@ -128,6 +128,12 @@ export default function Sidebar() {
             <Link href="/persons" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
               👤 Persons
             </Link>
+            <Link href="/parables" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              🌾 Parables
+            </Link>
+            <Link href="/typology" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              🔗 Typology
+            </Link>
           </div>
 
           {/* Book filter */}
