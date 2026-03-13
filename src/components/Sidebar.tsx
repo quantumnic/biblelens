@@ -7,9 +7,11 @@ import { BIBLE_BOOKS, BookInfo } from '@/lib/bible-books';
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedBook, setExpandedBook] = useState<number | null>(null);
+  const [bookFilter, setBookFilter] = useState('');
 
-  const otBooks = BIBLE_BOOKS.filter(b => b.testament === 'OT');
-  const ntBooks = BIBLE_BOOKS.filter(b => b.testament === 'NT');
+  const filterLower = bookFilter.toLowerCase();
+  const otBooks = BIBLE_BOOKS.filter(b => b.testament === 'OT' && (!filterLower || b.name.toLowerCase().includes(filterLower) || b.abbrev.toLowerCase().includes(filterLower)));
+  const ntBooks = BIBLE_BOOKS.filter(b => b.testament === 'NT' && (!filterLower || b.name.toLowerCase().includes(filterLower) || b.abbrev.toLowerCase().includes(filterLower)));
 
   const toggleBook = (id: number) => {
     setExpandedBook(expandedBook === id ? null : id);
@@ -105,6 +107,20 @@ export default function Sidebar() {
             <Link href="/alphabet" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
               🔤 Alphabet
             </Link>
+            <Link href="/chiasm" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              🔄 Chiasm
+            </Link>
+          </div>
+
+          {/* Book filter */}
+          <div className="px-2 mb-2">
+            <input
+              type="text"
+              value={bookFilter}
+              onChange={(e) => setBookFilter(e.target.value)}
+              placeholder="Filter books..."
+              className="w-full text-xs px-3 py-1.5 bg-parchment-800 border border-parchment-700 rounded text-parchment-200 placeholder-parchment-600 focus:outline-none focus:border-gold-500/50 transition-colors"
+            />
           </div>
 
           <div className="mb-2">

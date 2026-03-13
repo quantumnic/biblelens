@@ -8,6 +8,7 @@ import StrongsPanel from './StrongsPanel';
 import ResearchPanel from './ResearchPanel';
 import ManuscriptPanel from './ManuscriptPanel';
 import WordDNA from './WordDNA';
+import IntertextualPanel from './IntertextualPanel';
 
 interface Verse {
   book: number;
@@ -46,7 +47,7 @@ interface Props {
 
 export default function VerseDisplay({ verses, translations, strongsWords, latinWords }: Props) {
   const [selectedVerse, setSelectedVerse] = useState<{ book: number; chapter: number; verse: number } | null>(null);
-  const [showPanel, setShowPanel] = useState<'crossref' | 'strongs' | 'research' | 'manuscripts' | null>(null);
+  const [showPanel, setShowPanel] = useState<'crossref' | 'strongs' | 'research' | 'manuscripts' | 'intertextual' | null>(null);
   const [selectedStrongs, setSelectedStrongs] = useState<string | null>(null);
 
   // Group by verse number
@@ -196,6 +197,16 @@ export default function VerseDisplay({ verses, translations, strongsWords, latin
                 >
                   📜 Manuscripts
                 </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedVerse({ book: verseTranslations[0].book, chapter: verseTranslations[0].chapter, verse: parseInt(verseNum) });
+                    setShowPanel('intertextual');
+                  }}
+                  className="text-xs px-2 py-1 rounded bg-parchment-800 text-parchment-400 hover:text-gold-400 hover:bg-parchment-700 transition-colors"
+                >
+                  🔗 Intertextual
+                </button>
                 <Link
                   href={`/compare?book=${verseTranslations[0].book}&chapter=${verseTranslations[0].chapter}&verse=${verseNum}`}
                   onClick={(e) => e.stopPropagation()}
@@ -214,13 +225,13 @@ export default function VerseDisplay({ verses, translations, strongsWords, latin
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-sm font-semibold text-gold-400">{verseRef}</h3>
             <div className="flex gap-1">
-              {(['crossref', 'research', 'manuscripts'] as const).map(panel => (
+              {(['crossref', 'research', 'manuscripts', 'intertextual'] as const).map(panel => (
                 <button
                   key={panel}
                   onClick={() => setShowPanel(panel)}
                   className={`text-xs px-2 py-1 rounded transition-colors ${showPanel === panel ? 'bg-gold-600 text-parchment-950' : 'bg-parchment-800 text-parchment-400 hover:text-gold-400'}`}
                 >
-                  {panel === 'crossref' ? '🔗' : panel === 'research' ? '🎓' : '📜'}
+                  {panel === 'crossref' ? '🔗' : panel === 'research' ? '🎓' : panel === 'manuscripts' ? '📜' : '🧬'}
                 </button>
               ))}
               <button
@@ -236,6 +247,7 @@ export default function VerseDisplay({ verses, translations, strongsWords, latin
           {showPanel === 'strongs' && selectedStrongs && <StrongsPanel strongsId={selectedStrongs} />}
           {showPanel === 'research' && <ResearchPanel {...selectedVerse} />}
           {showPanel === 'manuscripts' && <ManuscriptPanel {...selectedVerse} />}
+          {showPanel === 'intertextual' && <IntertextualPanel {...selectedVerse} />}
         </div>
       )}
 

@@ -5,6 +5,7 @@ import fs from 'fs';
 import { EXTENDED_STRONGS_V2, EXTENDED_WORD_MAPPINGS_V2 } from './strongs-extended-v2';
 import { EXTENDED_STRONGS_V3, EXTENDED_WORD_MAPPINGS_V3 } from './strongs-extended-v3';
 import { EXTENDED_STRONGS_V4, EXTENDED_WORD_MAPPINGS_V4 } from './strongs-extended-v4';
+import { EXTENDED_STRONGS_V5, EXTENDED_WORD_MAPPINGS_V5 } from './strongs-extended-v5';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DB_PATH = path.join(DATA_DIR, 'bible.db');
@@ -392,8 +393,9 @@ async function main() {
     for (const s of EXTENDED_STRONGS_V2) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
     for (const s of EXTENDED_STRONGS_V3) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
     for (const s of EXTENDED_STRONGS_V4) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
+    for (const s of EXTENDED_STRONGS_V5) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
   })();
-  console.log(`Strong's concordance seeded: ${strongsData.length + extendedStrongs.length + EXTENDED_STRONGS_V2.length + EXTENDED_STRONGS_V3.length + EXTENDED_STRONGS_V4.length} entries.`);
+  console.log(`Strong's concordance seeded: ${strongsData.length + extendedStrongs.length + EXTENDED_STRONGS_V2.length + EXTENDED_STRONGS_V3.length + EXTENDED_STRONGS_V4.length + EXTENDED_STRONGS_V5.length} entries.`);
 
   // Word-strongs mappings
   const insertWordStrong = db.prepare('INSERT OR IGNORE INTO word_strongs (book, chapter, verse, word, strongs_id, position) VALUES (?, ?, ?, ?, ?, ?)');
@@ -433,6 +435,9 @@ async function main() {
       insertWordStrong.run(book, ch, v, word, sid, pos);
     }
     for (const [book,ch,v,word,sid,pos] of EXTENDED_WORD_MAPPINGS_V4) {
+      insertWordStrong.run(book, ch, v, word, sid, pos);
+    }
+    for (const [book,ch,v,word,sid,pos] of EXTENDED_WORD_MAPPINGS_V5) {
       insertWordStrong.run(book, ch, v, word, sid, pos);
     }
   })();

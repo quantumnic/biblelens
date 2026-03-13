@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import WordCloud from './WordCloud';
 
 interface WordFreq { word: string; count: number; }
 interface SentimentPoint { chapter: number; positive: number; negative: number; score: number; }
@@ -75,6 +76,13 @@ export default function AnalyticsCharts({ topWords, sentimentData, bookStats, ti
         <section className="bg-parchment-900 border border-parchment-800 rounded-2xl p-6">
           <h2 className="text-xl font-semibold text-parchment-200 mb-1">📝 Word Frequency</h2>
           <p className="text-xs text-parchment-500 mb-4">Top 30 words in {bookName} (KJV, stop words excluded)</p>
+          
+          {/* Word Cloud visualization */}
+          <div className="mb-6 bg-parchment-800/30 rounded-xl p-4 border border-parchment-800">
+            <p className="text-xs text-parchment-500 mb-2 text-center uppercase tracking-wider">Word Cloud</p>
+            <WordCloud words={topWords} maxWords={30} />
+          </div>
+
           <div className="space-y-1">
             {topWords.map(w => (
               <div key={w.word} className="flex items-center gap-3">
