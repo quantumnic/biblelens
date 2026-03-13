@@ -48,8 +48,9 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
   const [pubmed, setPubmed] = useState<PubMedResult[]>([]);
   const [openlib, setOpenlib] = useState<OpenLibResult[]>([]);
   const [crossref, setCrossref] = useState<CrossRefResult[]>([]);
+  const [openalex, setOpenalex] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'ai' | 'scholar' | 'pubmed' | 'books' | 'crossref' | 'resources'>('ai');
+  const [activeTab, setActiveTab] = useState<'ai' | 'scholar' | 'pubmed' | 'books' | 'crossref' | 'openalex' | 'resources'>('ai');
 
   const bookInfo = getBookById(book);
   const bookName = bookInfo?.name || '';
@@ -100,11 +101,23 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     setLoading(false);
   };
 
+  const fetchOpenAlex = async () => {
+    if (openalex.length > 0) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/research?q=${encodeURIComponent(searchQuery + ' biblical theology')}&source=openalex&limit=8`);
+      const data = await res.json();
+      setOpenalex(data.results || []);
+    } catch { /* ignore */ }
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (activeTab === 'scholar') fetchScholar();
     if (activeTab === 'pubmed') fetchPubMed();
     if (activeTab === 'books') fetchOpenLib();
     if (activeTab === 'crossref') fetchCrossRef();
+    if (activeTab === 'openalex') fetchOpenAlex();
   }, [activeTab]);
 
   // AI research queries
@@ -156,7 +169,7 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     <div className="space-y-3">
       {/* Tab bar */}
       <div className="flex gap-1 bg-parchment-800 rounded-lg p-1 overflow-x-auto">
-        {([['ai', '🤖 AI'], ['scholar', '🎓 Scholar'], ['pubmed', '🏥 PubMed'], ['books', '📚 Books'], ['crossref', '🔗 CrossRef'], ['resources', '📌 Links']] as const).map(([key, label]) => (
+        {([['ai', '🤖 AI'], ['scholar', '🎓 Scholar'], ['pubmed', '🏥 PubMed'], ['books', '📚 Books'], ['crossref', '🔗 CrossRef'], ['openalex', '📊 OpenAlex'], ['resources', '📌 Links']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
@@ -307,6 +320,36 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
               )}
               {c.doi && (
                 <p className="text-xs text-parchment-600 mt-1 font-mono">DOI: {c.doi}</p>
+              )}
+            </a>
+          ))}
+        </div>
+      )}
+
+      {/* OpenAlex Tab */}
+      {activeTab === 'openalex' && (
+        <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+          {loading && <div className="text-parchment-500 text-sm animate-pulse">Searching OpenAlex…</div>}
+          {!loading && openalex.length === 0 && <div className="text-parchment-500 text-sm">No results found.</div>}
+          {openalex.map((item: any, i: number) => (
+            <a
+              key={i}
+              href={item.url || item.id}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block p-3 rounded-lg bg-parchment-800 hover:bg-parchment-700 transition-colors"
+            >
+              <h4 className="text-sm text-parchment-100 font-medium leading-tight">{item.title}</h4>
+              <div className="flex gap-3 mt-1 text-xs text-parchment-500">
+                {item.year && <span>📅 {item.year}</span>}
+                {item.citationCount > 0 && <span>📄 {item.citationCount} citations</span>}
+                {item.journal && <span>📰 {item.journal}</span>}
+              </div>
+              {item.authors?.length > 0 && (
+                <p className="text-xs text-parchment-500 mt-1">{item.authors.slice(0, 3).join(', ')}{item.authors.length > 3 ? ' et al.' : ''}</p>
+              )}
+              {item.abstract && (
+                <p className="text-xs text-parchment-400 mt-2 line-clamp-3">{item.abstract}</p>
               )}
             </a>
           ))}

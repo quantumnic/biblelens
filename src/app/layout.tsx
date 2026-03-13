@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import ScrollToTop from '@/components/ScrollToTop';
 import Footer from '@/components/Footer';
+import ReadingProgress from '@/components/ReadingProgress';
 
 export const metadata: Metadata = {
   title: 'BibleLens — Analytical Bible Study Tool',
@@ -28,6 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen bg-parchment-950">
+        <ReadingProgress />
         <div className="flex min-h-screen">
           {children}
         </div>

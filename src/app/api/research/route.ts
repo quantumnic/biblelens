@@ -134,7 +134,57 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref' }, { status: 400 });
+  if (source === 'openalex') {
+    try {
+      const url = `https://api.openalex.org/works?search=${encodeURIComponent(query)}&per_page=${limit}&select=id,doi,title,authorships,publication_year,cited_by_count,primary_location,abstract_inverted_index`;
+      const res = await fetch(url, {
+        headers: { 'User-Agent': 'BibleLens/1.0 (biblelens@research)', 'Accept': 'application/json' },
+        next: { revalidate: 3600 },
+      });
+
+      if (!res.ok) {
+        return NextResponse.json({ error: 'OpenAlex API error', status: res.status }, { status: 502 });
+      }
+
+      const data = await res.json();
+      const results = (data.results || []).map((item: any) => {
+        // Reconstruct abstract from inverted index
+        let abstract: string | null = null;
+        if (item.abstract_inverted_index) {
+          const words: [string, number][] = [];
+          for (const [word, positions] of Object.entries(item.abstract_inverted_index as Record<string, number[]>)) {
+            for (const pos of positions) {
+              words.push([word, pos]);
+            }
+          }
+          words.sort((a, b) => a[1] - b[1]);
+          abstract = words.map(([w]) => w).join(' ').slice(0, 400);
+        }
+
+        return {
+          id: item.id,
+          doi: item.doi,
+          title: item.title || '',
+          authors: (item.authorships || []).slice(0, 5).map((a: any) => a.author?.display_name || ''),
+          year: item.publication_year,
+          citationCount: item.cited_by_count || 0,
+          journal: item.primary_location?.source?.display_name || '',
+          abstract,
+          url: item.doi || item.id,
+        };
+      });
+
+      return NextResponse.json({
+        source: 'openalex',
+        results,
+        total: data.meta?.count || 0,
+      });
+    } catch (e: any) {
+      return NextResponse.json({ error: 'Failed to query OpenAlex', details: e.message }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex' }, { status: 400 });
   } catch (error) {
     return handleApiError(error);
   }

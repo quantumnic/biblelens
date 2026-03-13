@@ -110,6 +110,12 @@ export default function Sidebar() {
             <Link href="/chiasm" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
               🔄 Chiasm
             </Link>
+            <Link href="/concordance" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              📖 Concordance
+            </Link>
+            <Link href="/geography" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              🗺️ Geography
+            </Link>
           </div>
 
           {/* Book filter */}

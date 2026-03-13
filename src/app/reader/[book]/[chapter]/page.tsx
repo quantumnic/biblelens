@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import VerseDisplay from '@/components/VerseDisplay';
 import KeyboardNav from '@/components/KeyboardNav';
+import ChapterTools from '@/components/ChapterTools';
 import { getBookBySlug, getBookById, BIBLE_BOOKS } from '@/lib/bible-books';
 import { getDb } from '@/lib/db';
 
@@ -163,6 +164,9 @@ export default function ReaderPage({ params, searchParams }: Props) {
           strongsWords={strongsWords}
           latinWords={latinWords}
         />
+
+        {/* Chapter Tools */}
+        <ChapterTools book={bookInfo.id} chapter={chapter} />
 
         {/* Navigation */}
         <div className="flex justify-between items-center mt-8 pt-4 border-t border-parchment-800">

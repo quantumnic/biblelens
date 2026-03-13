@@ -9,6 +9,7 @@ import ResearchPanel from './ResearchPanel';
 import ManuscriptPanel from './ManuscriptPanel';
 import WordDNA from './WordDNA';
 import IntertextualPanel from './IntertextualPanel';
+import CopyButton from './CopyButton';
 
 interface Verse {
   book: number;
@@ -214,6 +215,10 @@ export default function VerseDisplay({ verses, translations, strongsWords, latin
                 >
                   ⚖️ Compare
                 </Link>
+                <CopyButton
+                  text={`"${verseTranslations[0].text}" — ${bookInfo?.name || ''} ${verseTranslations[0].chapter}:${verseNum} (${verseTranslations[0].translation})`}
+                  label="Copy verse with reference"
+                />
               </div>
             </div>
           ))}
