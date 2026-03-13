@@ -26,10 +26,12 @@ export default function Footer() {
             <h3 className="text-xs font-semibold text-gold-500 uppercase tracking-wider mb-2">Explore</h3>
             <div className="space-y-1">
               <Link href="/analytics" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Analytics</Link>
+              <Link href="/heatmap" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Word Heatmap</Link>
               <Link href="/timeline" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Timeline</Link>
+              <Link href="/figures" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Figures of Speech</Link>
+              <Link href="/names-of-god" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Names of God</Link>
+              <Link href="/persons" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Key Persons</Link>
               <Link href="/verse-of-the-day" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Verse of the Day</Link>
-              <Link href="/study-notes" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Study Notes</Link>
-              <Link href="/reading-plans" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Reading Plans</Link>
               <Link href="/alphabet" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Alphabets</Link>
             </div>
           </div>

@@ -170,6 +170,26 @@ export default function Home() {
             <p className="text-sm text-parchment-200 mt-2 font-semibold">Geography</p>
             <p className="text-xs text-parchment-500 mt-0.5">Biblical places</p>
           </Link>
+          <Link href="/figures" className="p-4 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all text-center group">
+            <span className="text-2xl group-hover:scale-110 inline-block transition-transform">🎭</span>
+            <p className="text-sm text-parchment-200 mt-2 font-semibold">Figures of Speech</p>
+            <p className="text-xs text-parchment-500 mt-0.5">Literary devices</p>
+          </Link>
+          <Link href="/heatmap" className="p-4 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all text-center group">
+            <span className="text-2xl group-hover:scale-110 inline-block transition-transform">🔥</span>
+            <p className="text-sm text-parchment-200 mt-2 font-semibold">Word Heatmap</p>
+            <p className="text-xs text-parchment-500 mt-0.5">Visual distribution</p>
+          </Link>
+          <Link href="/names-of-god" className="p-4 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all text-center group">
+            <span className="text-2xl group-hover:scale-110 inline-block transition-transform">✡️</span>
+            <p className="text-sm text-parchment-200 mt-2 font-semibold">Names of God</p>
+            <p className="text-xs text-parchment-500 mt-0.5">Divine names &amp; titles</p>
+          </Link>
+          <Link href="/persons" className="p-4 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all text-center group">
+            <span className="text-2xl group-hover:scale-110 inline-block transition-transform">👤</span>
+            <p className="text-sm text-parchment-200 mt-2 font-semibold">Key Persons</p>
+            <p className="text-xs text-parchment-500 mt-0.5">Biblical figures</p>
+          </Link>
         </div>
 
         {/* Popular Passages */}
