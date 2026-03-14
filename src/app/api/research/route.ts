@@ -222,7 +222,75 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex, doaj' }, { status: 400 });
+  if (source === 'internetarchive') {
+    try {
+      const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier&fl[]=title&fl[]=creator&fl[]=date&fl[]=description&fl[]=mediatype&fl[]=subject&rows=${limit}&output=json`;
+      const res = await fetch(url, { next: { revalidate: 3600 } });
+
+      if (!res.ok) {
+        return NextResponse.json({ error: 'Internet Archive API error', status: res.status }, { status: 502 });
+      }
+
+      const data = await res.json();
+      const docs = data.response?.docs || [];
+      const results = docs.map((doc: any) => ({
+        id: doc.identifier,
+        title: doc.title || '',
+        authors: doc.creator ? (Array.isArray(doc.creator) ? doc.creator : [doc.creator]) : [],
+        year: doc.date ? doc.date.slice(0, 4) : null,
+        description: (doc.description || '').slice(0, 400),
+        mediatype: doc.mediatype || '',
+        subjects: doc.subject ? (Array.isArray(doc.subject) ? doc.subject.slice(0, 5) : [doc.subject]) : [],
+        url: `https://archive.org/details/${doc.identifier}`,
+      }));
+
+      return NextResponse.json({
+        source: 'internetarchive',
+        results,
+        total: data.response?.numFound || 0,
+      });
+    } catch (e: any) {
+      return NextResponse.json({ error: 'Failed to query Internet Archive', details: e.message }, { status: 500 });
+    }
+  }
+
+  if (source === 'europepmc') {
+    try {
+      const url = `https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=${encodeURIComponent(query)}&format=json&pageSize=${limit}&resultType=core`;
+      const res = await fetch(url, {
+        headers: { 'Accept': 'application/json' },
+        next: { revalidate: 3600 },
+      });
+
+      if (!res.ok) {
+        return NextResponse.json({ error: 'Europe PMC API error', status: res.status }, { status: 502 });
+      }
+
+      const data = await res.json();
+      const items = data.resultList?.result || [];
+      const results = items.map((item: any) => ({
+        id: item.id || item.pmid || '',
+        doi: item.doi || null,
+        title: item.title || '',
+        authors: (item.authorList?.author || []).map((a: any) => a.fullName || `${a.firstName || ''} ${a.lastName || ''}`.trim()),
+        year: item.pubYear || null,
+        journal: item.journalTitle || '',
+        abstract: (item.abstractText || '').slice(0, 400),
+        url: item.doi ? `https://doi.org/${item.doi}` : `https://europepmc.org/article/${item.source}/${item.id}`,
+        citationCount: item.citedByCount || 0,
+      }));
+
+      return NextResponse.json({
+        source: 'europepmc',
+        results,
+        total: data.hitCount || 0,
+      });
+    } catch (e: any) {
+      return NextResponse.json({ error: 'Failed to query Europe PMC', details: e.message }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex, doaj, internetarchive, europepmc' }, { status: 400 });
   } catch (error) {
     return handleApiError(error);
   }

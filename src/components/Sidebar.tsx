@@ -134,6 +134,9 @@ export default function Sidebar() {
             <Link href="/typology" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
               🔗 Typology
             </Link>
+            <Link href="/prophecies" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              🔮 Prophecies
+            </Link>
           </div>
 
           {/* Book filter */}
