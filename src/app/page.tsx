@@ -215,6 +215,16 @@ export default function Home() {
             <p className="text-sm text-parchment-200 mt-2 font-semibold">Sacrifices</p>
             <p className="text-xs text-parchment-500 mt-0.5">Levitical offerings &amp; fulfillment</p>
           </Link>
+          <Link href="/miracles" className="p-4 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all text-center group">
+            <span className="text-2xl group-hover:scale-110 inline-block transition-transform">✨</span>
+            <p className="text-sm text-parchment-200 mt-2 font-semibold">Miracles</p>
+            <p className="text-xs text-parchment-500 mt-0.5">Supernatural acts catalogued</p>
+          </Link>
+          <Link href="/prayers" className="p-4 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all text-center group">
+            <span className="text-2xl group-hover:scale-110 inline-block transition-transform">🙏</span>
+            <p className="text-sm text-parchment-200 mt-2 font-semibold">Prayers</p>
+            <p className="text-xs text-parchment-500 mt-0.5">Notable prayers of Scripture</p>
+          </Link>
         </div>
 
         {/* Popular Passages */}

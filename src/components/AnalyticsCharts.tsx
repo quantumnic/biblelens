@@ -266,6 +266,30 @@ export default function AnalyticsCharts({ topWords, sentimentData, bookStats, ti
           </div>
         ))}
       </section>
+
+      {/* Verse Density — avg chars per verse by book */}
+      <section className="bg-parchment-900 border border-parchment-800 rounded-xl p-5">
+        <h3 className="text-lg font-semibold text-parchment-200 mb-4 font-serif">📐 Verse Density (avg chars/verse)</h3>
+        <p className="text-xs text-parchment-500 mb-3">Which books have the longest or shortest verses on average?</p>
+        <div className="flex flex-wrap gap-2">
+          {(() => {
+            const densities = bookStats
+              .filter(b => b.verses > 0)
+              .map(b => ({ name: b.name, density: Math.round(b.chars / b.verses), testament: b.testament }))
+              .sort((a, b) => b.density - a.density);
+            const maxDensity = densities[0]?.density || 1;
+            return densities.slice(0, 20).map(d => (
+              <div key={d.name} className="flex items-center gap-2 bg-parchment-800 rounded-lg px-3 py-1.5">
+                <span className={`text-xs font-medium ${d.testament === 'OT' ? 'text-amber-400' : 'text-blue-400'}`}>{d.name}</span>
+                <div className="w-20 h-2 bg-parchment-700 rounded-full overflow-hidden">
+                  <div className="h-full bg-gold-500 rounded-full" style={{ width: `${(d.density / maxDensity) * 100}%` }} />
+                </div>
+                <span className="text-xs text-parchment-400">{d.density}</span>
+              </div>
+            ));
+          })()}
+        </div>
+      </section>
     </div>
   );
 }

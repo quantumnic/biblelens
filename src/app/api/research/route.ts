@@ -327,7 +327,81 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex, doaj, internetarchive, europepmc, googlebooks' }, { status: 400 });
+  if (source === 'philpapers') {
+    try {
+      const url = `https://philpapers.org/s/${encodeURIComponent(query)}.json?limit=${limit}`;
+      const res = await fetch(url, {
+        headers: { 'Accept': 'application/json' },
+        next: { revalidate: 3600 },
+      });
+
+      if (!res.ok) {
+        return NextResponse.json({ error: 'PhilPapers API error', status: res.status }, { status: 502 });
+      }
+
+      const data = await res.json();
+      const results = (Array.isArray(data) ? data : []).slice(0, limit).map((item: any) => ({
+        title: item.title || '',
+        authors: item.authors?.map((a: any) => a.name || a) || [],
+        year: item.year || null,
+        abstract: (item.abstract || '').slice(0, 400),
+        url: item.url || `https://philpapers.org/rec/${item.id}`,
+        journal: item.journal || null,
+      }));
+
+      return NextResponse.json({ source: 'philpapers', results, total: results.length });
+    } catch (e: any) {
+      return NextResponse.json({ error: 'Failed to query PhilPapers', details: e.message }, { status: 500 });
+    }
+  }
+
+  if (source === 'jstor') {
+    try {
+      // JSTOR Data for Research (DfR) API
+      const url = `https://www.jstor.org/api/search-lite?Query=${encodeURIComponent(query)}&pageSize=${limit}`;
+      const res = await fetch(url, {
+        headers: { 'Accept': 'application/json' },
+        next: { revalidate: 3600 },
+      });
+
+      if (!res.ok) {
+        // Fallback: try JSTOR's open search
+        const fallbackUrl = `https://www.jstor.org/action/doBasicSearch?Query=${encodeURIComponent(query)}&format=json`;
+        const fallbackRes = await fetch(fallbackUrl, {
+          headers: { 'Accept': 'application/json' },
+          next: { revalidate: 3600 },
+        });
+
+        if (!fallbackRes.ok) {
+          return NextResponse.json({
+            source: 'jstor',
+            results: [],
+            total: 0,
+            note: 'JSTOR search API unavailable; try semanticscholar or crossref for academic papers.',
+          });
+        }
+
+        const fallbackData = await fallbackRes.json();
+        return NextResponse.json({ source: 'jstor', results: fallbackData.results || [], total: 0 });
+      }
+
+      const data = await res.json();
+      const results = (data.results || data.items || []).slice(0, limit).map((item: any) => ({
+        title: item.title || '',
+        authors: item.authors || [],
+        year: item.year || item.publicationYear || null,
+        journal: item.journal || item.publicationTitle || null,
+        url: item.url || (item.doi ? `https://doi.org/${item.doi}` : `https://www.jstor.org/stable/${item.id}`),
+        doi: item.doi || null,
+      }));
+
+      return NextResponse.json({ source: 'jstor', results, total: data.totalResults || results.length });
+    } catch (e: any) {
+      return NextResponse.json({ error: 'Failed to query JSTOR', details: e.message }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex, doaj, internetarchive, europepmc, googlebooks, philpapers, jstor' }, { status: 400 });
   } catch (error) {
     return handleApiError(error);
   }
