@@ -12,6 +12,7 @@ import { EXTENDED_STRONGS_V8, EXTENDED_WORD_STRONGS_V8 } from './strongs-extende
 import { EXTENDED_STRONGS_V9, EXTENDED_WORD_STRONGS_V9 } from './strongs-extended-v9';
 import { EXTENDED_STRONGS_V10, EXTENDED_WORD_STRONGS_V10 } from './strongs-extended-v10';
 import { EXTENDED_STRONGS_V11, EXTENDED_WORD_STRONGS_V11 } from './strongs-extended-v11';
+import { EXTENDED_STRONGS_V12, EXTENDED_WORD_STRONGS_V12 } from './strongs-extended-v12';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DB_PATH = path.join(DATA_DIR, 'bible.db');
@@ -406,8 +407,9 @@ async function main() {
     for (const s of EXTENDED_STRONGS_V9) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
     for (const s of EXTENDED_STRONGS_V10) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
     for (const s of EXTENDED_STRONGS_V11) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
+    for (const s of EXTENDED_STRONGS_V12) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
   })();
-  console.log(`Strong's concordance seeded: ${strongsData.length + extendedStrongs.length + EXTENDED_STRONGS_V2.length + EXTENDED_STRONGS_V3.length + EXTENDED_STRONGS_V4.length + EXTENDED_STRONGS_V5.length + EXTENDED_STRONGS_V6.length + EXTENDED_STRONGS_V7.length + EXTENDED_STRONGS_V8.length + EXTENDED_STRONGS_V9.length + EXTENDED_STRONGS_V10.length + EXTENDED_STRONGS_V11.length} entries.`);
+  console.log(`Strong's concordance seeded: ${strongsData.length + extendedStrongs.length + EXTENDED_STRONGS_V2.length + EXTENDED_STRONGS_V3.length + EXTENDED_STRONGS_V4.length + EXTENDED_STRONGS_V5.length + EXTENDED_STRONGS_V6.length + EXTENDED_STRONGS_V7.length + EXTENDED_STRONGS_V8.length + EXTENDED_STRONGS_V9.length + EXTENDED_STRONGS_V10.length + EXTENDED_STRONGS_V11.length + EXTENDED_STRONGS_V12.length} entries.`);
 
   // Word-strongs mappings
   const insertWordStrong = db.prepare('INSERT OR IGNORE INTO word_strongs (book, chapter, verse, word, strongs_id, position) VALUES (?, ?, ?, ?, ?, ?)');
@@ -468,6 +470,9 @@ async function main() {
       insertWordStrong.run(m.book, m.chapter, m.verse, m.word, m.strongs_id, 1);
     }
     for (const m of EXTENDED_WORD_STRONGS_V11) {
+      insertWordStrong.run(m.book, m.chapter, m.verse, m.word, m.strongs_id, 1);
+    }
+    for (const m of EXTENDED_WORD_STRONGS_V12) {
       insertWordStrong.run(m.book, m.chapter, m.verse, m.word, m.strongs_id, 1);
     }
   })();

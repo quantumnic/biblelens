@@ -401,8 +401,52 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex, doaj, internetarchive, europepmc, googlebooks, philpapers, jstor' }, { status: 400 });
+  if (source === 'core') {
+    try {
+      const url = `https://api.core.ac.uk/v3/search/works/?q=${encodeURIComponent(query)}&limit=${limit}`;
+      const res = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+        },
+        next: { revalidate: 3600 },
+      });
+
+      if (!res.ok) {
+        return NextResponse.json({
+          source: 'core',
+          results: [],
+          total: 0,
+          note: 'CORE API returned an error; try semanticscholar or crossref as alternatives.',
+        });
+      }
+
+      const data = await res.json();
+      const results = (data.results || []).slice(0, limit).map((item: any) => ({
+        id: item.id || '',
+        doi: item.doi || null,
+        title: item.title || '',
+        authors: (item.authors || []).map((a: any) => a.name || ''),
+        year: item.yearPublished || null,
+        abstract: (item.abstract || '').slice(0, 400),
+        journal: item.publisher || item.journals?.[0]?.title || '',
+        url: item.downloadUrl || item.sourceFulltextUrls?.[0] || (item.doi ? `https://doi.org/${item.doi}` : `https://core.ac.uk/works/${item.id}`),
+        language: item.language?.code || null,
+        citationCount: item.citationCount || null,
+      }));
+
+      return NextResponse.json({
+        source: 'core',
+        results,
+        total: data.totalHits || results.length,
+      });
+    } catch (e: any) {
+      return NextResponse.json({ error: 'Failed to query CORE', details: e.message }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex, doaj, internetarchive, europepmc, googlebooks, philpapers, jstor, core' }, { status: 400 });
   } catch (error) {
     return handleApiError(error);
   }
 }
+// NOTE: this gets appended; need to insert before final return

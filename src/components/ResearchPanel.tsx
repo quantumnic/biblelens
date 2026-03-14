@@ -52,8 +52,9 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
   const [archive, setArchive] = useState<any[]>([]);
   const [europepmc, setEuropepmc] = useState<any[]>([]);
   const [googlebooks, setGooglebooks] = useState<any[]>([]);
+  const [coreResults, setCoreResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'ai' | 'scholar' | 'pubmed' | 'books' | 'crossref' | 'openalex' | 'archive' | 'europepmc' | 'googlebooks' | 'resources'>('ai');
+  const [activeTab, setActiveTab] = useState<'ai' | 'scholar' | 'pubmed' | 'books' | 'crossref' | 'openalex' | 'archive' | 'europepmc' | 'googlebooks' | 'core' | 'resources'>('ai');
 
   const bookInfo = getBookById(book);
   const bookName = bookInfo?.name || '';
@@ -148,6 +149,17 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     setLoading(false);
   };
 
+  const fetchCore = async () => {
+    if (coreResults.length > 0) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/research?q=${encodeURIComponent(searchQuery + ' biblical theology')}&source=core&limit=8`);
+      const data = await res.json();
+      setCoreResults(data.results || []);
+    } catch { /* ignore */ }
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (activeTab === 'scholar') fetchScholar();
     if (activeTab === 'pubmed') fetchPubMed();
@@ -157,6 +169,7 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     if (activeTab === 'archive') fetchArchive();
     if (activeTab === 'europepmc') fetchEuropePMC();
     if (activeTab === 'googlebooks') fetchGoogleBooks();
+    if (activeTab === 'core') fetchCore();
   }, [activeTab]);
 
   // AI research queries
@@ -208,7 +221,7 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     <div className="space-y-3">
       {/* Tab bar */}
       <div className="flex gap-1 bg-parchment-800 rounded-lg p-1 overflow-x-auto">
-        {([['ai', '🤖 AI'], ['scholar', '🎓 Scholar'], ['pubmed', '🏥 PubMed'], ['books', '📚 Books'], ['googlebooks', '📖 Google'], ['crossref', '🔗 CrossRef'], ['openalex', '📊 OpenAlex'], ['archive', '🏛️ Archive'], ['europepmc', '🇪🇺 EuroPMC'], ['resources', '📌 Links']] as const).map(([key, label]) => (
+        {([['ai', '🤖 AI'], ['scholar', '🎓 Scholar'], ['pubmed', '🏥 PubMed'], ['books', '📚 Books'], ['googlebooks', '📖 Google'], ['crossref', '🔗 CrossRef'], ['openalex', '📊 OpenAlex'], ['archive', '🏛️ Archive'], ['europepmc', '🇪🇺 EuroPMC'], ['core', '🔬 CORE'], ['resources', '📌 Links']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
@@ -495,6 +508,27 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
               </div>
             </a>
           ))}
+        </div>
+      )}
+
+      {/* CORE Tab */}
+      {activeTab === 'core' && (
+        <div className="space-y-2">
+          <p className="text-xs text-parchment-500 mb-2">Open-access research from <strong className="text-gold-400">CORE</strong> — the world&apos;s largest aggregator of open-access papers</p>
+          {loading && <p className="text-sm text-parchment-500 animate-pulse">Searching CORE...</p>}
+          {coreResults.map((item: any, i: number) => (
+            <a key={i} href={item.url} target="_blank" rel="noopener noreferrer"
+              className="block p-3 bg-parchment-800 rounded-lg hover:bg-parchment-700 transition-colors group">
+              <p className="text-sm text-parchment-200 font-medium group-hover:text-gold-400 mb-1">{item.title}</p>
+              <div className="flex items-center gap-2 text-xs text-parchment-500 flex-wrap">
+                {item.authors?.slice(0, 3).join(', ') && <span>{item.authors.slice(0, 3).join(', ')}</span>}
+                {item.year && <span>• {item.year}</span>}
+                {item.journal && <span>• {item.journal}</span>}
+              </div>
+              {item.abstract && <p className="text-xs text-parchment-500 mt-1 line-clamp-2">{item.abstract}</p>}
+            </a>
+          ))}
+          {!loading && coreResults.length === 0 && <p className="text-sm text-parchment-500">No results found.</p>}
         </div>
       )}
 

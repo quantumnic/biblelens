@@ -4,10 +4,66 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { BIBLE_BOOKS, BookInfo } from '@/lib/bible-books';
 
+interface NavSection {
+  label: string;
+  links: { href: string; icon: string; label: string }[];
+}
+
+const NAV_SECTIONS: NavSection[] = [
+  {
+    label: '📚 Study Tools',
+    links: [
+      { href: '/search', icon: '🔍', label: 'Search' },
+      { href: '/compare', icon: '⚖️', label: 'Compare' },
+      { href: '/analytics', icon: '📊', label: 'Analytics' },
+      { href: '/word/G26', icon: '📖', label: "Strong's" },
+      { href: '/latin/amor', icon: '📜', label: 'Latin' },
+      { href: '/concordance', icon: '📖', label: 'Concordance' },
+      { href: '/heatmap', icon: '🔥', label: 'Heatmap' },
+    ],
+  },
+  {
+    label: '⛪ Theological',
+    links: [
+      { href: '/parallels', icon: '🔀', label: 'Parallels' },
+      { href: '/chiasm', icon: '🔄', label: 'Chiasm' },
+      { href: '/typology', icon: '🔗', label: 'Typology' },
+      { href: '/prophecies', icon: '🔮', label: 'Prophecies' },
+      { href: '/covenants', icon: '📜', label: 'Covenants' },
+      { href: '/beatitudes', icon: '😇', label: 'Beatitudes' },
+      { href: '/figures', icon: '🎭', label: 'Figures' },
+    ],
+  },
+  {
+    label: '📖 Reference',
+    links: [
+      { href: '/names-of-god', icon: '✡️', label: 'Names' },
+      { href: '/persons', icon: '👤', label: 'Persons' },
+      { href: '/parables', icon: '🌾', label: 'Parables' },
+      { href: '/miracles', icon: '✨', label: 'Miracles' },
+      { href: '/prayers', icon: '🙏', label: 'Prayers' },
+      { href: '/sacrifices', icon: '🔥', label: 'Sacrifices' },
+      { href: '/geography', icon: '🗺️', label: 'Geography' },
+      { href: '/alphabet', icon: '🔤', label: 'Alphabet' },
+    ],
+  },
+  {
+    label: '📝 Personal',
+    links: [
+      { href: '/verse-of-the-day', icon: '✨', label: 'Daily' },
+      { href: '/bookmarks', icon: '📑', label: 'Bookmarks' },
+      { href: '/timeline', icon: '📅', label: 'Timeline' },
+      { href: '/study-notes', icon: '📝', label: 'Notes' },
+      { href: '/reading-plans', icon: '📅', label: 'Plans' },
+    ],
+  },
+];
+
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedBook, setExpandedBook] = useState<number | null>(null);
   const [bookFilter, setBookFilter] = useState('');
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
 
   const filterLower = bookFilter.toLowerCase();
   const otBooks = BIBLE_BOOKS.filter(b => b.testament === 'OT' && (!filterLower || b.name.toLowerCase().includes(filterLower) || b.abbrev.toLowerCase().includes(filterLower)));
@@ -15,6 +71,15 @@ export default function Sidebar() {
 
   const toggleBook = (id: number) => {
     setExpandedBook(expandedBook === id ? null : id);
+  };
+
+  const toggleSection = (label: string) => {
+    setCollapsedSections(prev => {
+      const next = new Set(prev);
+      if (next.has(label)) next.delete(label);
+      else next.add(label);
+      return next;
+    });
   };
 
   const renderBook = (book: BookInfo) => (
@@ -70,89 +135,43 @@ export default function Sidebar() {
         </div>
 
         <nav className="p-2">
-          <div className="grid grid-cols-2 gap-1.5 mb-3 px-2">
-            <Link href="/search" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              🔍 Search
-            </Link>
-            <Link href="/compare" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              ⚖️ Compare
-            </Link>
-            <Link href="/analytics" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              📊 Analytics
-            </Link>
-            <Link href="/word/G26" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              📖 Strong&apos;s
-            </Link>
-            <Link href="/latin/amor" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              📜 Latin
-            </Link>
-            <Link href="/verse-of-the-day" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              ✨ Daily
-            </Link>
-            <Link href="/parallels" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              🔀 Parallels
-            </Link>
-            <Link href="/bookmarks" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              📑 Bookmarks
-            </Link>
-            <Link href="/timeline" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              📅 Timeline
-            </Link>
-            <Link href="/study-notes" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              📝 Notes
-            </Link>
-            <Link href="/reading-plans" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              📅 Plans
-            </Link>
-            <Link href="/alphabet" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              🔤 Alphabet
-            </Link>
-            <Link href="/chiasm" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              🔄 Chiasm
-            </Link>
-            <Link href="/concordance" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              📖 Concordance
-            </Link>
-            <Link href="/geography" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              🗺️ Geography
-            </Link>
-            <Link href="/figures" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              🎭 Figures
-            </Link>
-            <Link href="/heatmap" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              🔥 Heatmap
-            </Link>
-            <Link href="/names-of-god" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              ✡️ Names
-            </Link>
-            <Link href="/persons" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              👤 Persons
-            </Link>
-            <Link href="/parables" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              🌾 Parables
-            </Link>
-            <Link href="/typology" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              🔗 Typology
-            </Link>
-            <Link href="/prophecies" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              🔮 Prophecies
-            </Link>
-            <Link href="/covenants" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              📜 Covenants
-            </Link>
-            <Link href="/sacrifices" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              🔥 Sacrifices
-            </Link>
-            <Link href="/miracles" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              ✨ Miracles
-            </Link>
-            <Link href="/prayers" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
-              🙏 Prayers
-            </Link>
-          </div>
+          {/* Collapsible nav sections */}
+          {NAV_SECTIONS.map(section => {
+            const isCollapsed = collapsedSections.has(section.label);
+            return (
+              <div key={section.label} className="mb-2">
+                <button
+                  onClick={() => toggleSection(section.label)}
+                  className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-gold-500 uppercase tracking-wider hover:text-gold-400 transition-colors"
+                >
+                  <span>{section.label}</span>
+                  <svg
+                    className={`w-3 h-3 transition-transform ${isCollapsed ? '-rotate-90' : ''}`}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {!isCollapsed && (
+                  <div className="grid grid-cols-2 gap-1.5 px-2 mb-1">
+                    {section.links.map(link => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        {link.icon} {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
 
           {/* Book filter */}
-          <div className="px-2 mb-2">
+          <div className="px-2 mb-2 mt-2">
             <input
               type="text"
               value={bookFilter}

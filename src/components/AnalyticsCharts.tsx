@@ -41,9 +41,31 @@ export default function AnalyticsCharts({ topWords, sentimentData, bookStats, ti
 
   const maxThemeCount = themes[0]?.count || 1;
 
+  const [coWord, setCoWord] = useState('');
+  const [coResults, setCoResults] = useState<{ word: string; count: number; percentage: number }[]>([]);
+  const [coTotal, setCoTotal] = useState(0);
+  const [coLoading, setCoLoading] = useState(false);
+
+  const searchCoOccurrences = () => {
+    if (!coWord.trim()) return;
+    setCoLoading(true);
+    const url = bookId && bookId > 0
+      ? `/api/co-occurrence?word=${encodeURIComponent(coWord.trim().toLowerCase())}&book=${bookId}`
+      : `/api/co-occurrence?word=${encodeURIComponent(coWord.trim().toLowerCase())}`;
+    fetch(url)
+      .then(r => r.json())
+      .then(d => {
+        setCoResults(d.coOccurrences || []);
+        setCoTotal(d.totalVerses || 0);
+        setCoLoading(false);
+      })
+      .catch(() => setCoLoading(false));
+  };
+
   const sections = [
     { id: 'all', label: '📋 All' },
     { id: 'words', label: '📝 Words' },
+    { id: 'cooccurrence', label: '🔗 Co-occur' },
     { id: 'sentiment', label: '🎭 Sentiment' },
     { id: 'themes', label: '⛪ Themes' },
     { id: 'books', label: '📚 Books' },
@@ -97,6 +119,55 @@ export default function AnalyticsCharts({ topWords, sentimentData, bookStats, ti
               </div>
             ))}
           </div>
+        </section>
+      )}
+
+      {/* Word Co-occurrence */}
+      {show('cooccurrence') && (
+        <section className="bg-parchment-900 border border-parchment-800 rounded-2xl p-6">
+          <h2 className="text-xl font-semibold text-parchment-200 mb-1">🔗 Word Co-occurrence</h2>
+          <p className="text-xs text-parchment-500 mb-4">Find which words appear most often alongside a given word in {bookName}</p>
+          <div className="flex gap-2 mb-4">
+            <input
+              type="text"
+              value={coWord}
+              onChange={e => setCoWord(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && searchCoOccurrences()}
+              placeholder="Enter a word (e.g., love, faith, sin)..."
+              className="flex-1 text-sm px-3 py-2 bg-parchment-800 border border-parchment-700 rounded-lg text-parchment-200 placeholder-parchment-600 focus:outline-none focus:border-gold-500/50 transition-colors"
+            />
+            <button
+              onClick={searchCoOccurrences}
+              disabled={coLoading}
+              className="px-4 py-2 bg-gold-600 text-parchment-950 rounded-lg text-sm font-semibold hover:bg-gold-500 transition-colors disabled:opacity-50"
+            >
+              {coLoading ? '...' : 'Search'}
+            </button>
+          </div>
+          {coTotal > 0 && (
+            <>
+              <p className="text-xs text-parchment-500 mb-3">
+                Found <span className="text-gold-400 font-semibold">&ldquo;{coWord}&rdquo;</span> in {coTotal} verses. Top co-occurring words:
+              </p>
+              <div className="space-y-1">
+                {coResults.map(r => (
+                  <div key={r.word} className="flex items-center gap-3">
+                    <span className="text-xs text-parchment-400 w-24 text-right font-mono">{r.word}</span>
+                    <div className="flex-1 h-5 bg-parchment-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full transition-all"
+                        style={{ width: `${r.percentage}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-parchment-500 w-16">{r.count} ({r.percentage}%)</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+          {coTotal === 0 && coResults.length === 0 && !coLoading && coWord && (
+            <p className="text-sm text-parchment-500">No results. Try a different word.</p>
+          )}
         </section>
       )}
 
