@@ -37,6 +37,8 @@ export default function Footer() {
               <Link href="/persons" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Key Persons</Link>
               <Link href="/parables" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Parables of Jesus</Link>
               <Link href="/typology" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Biblical Typology</Link>
+              <Link href="/covenants" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Biblical Covenants</Link>
+              <Link href="/sacrifices" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Levitical Sacrifices</Link>
               <Link href="/geography" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Geography</Link>
               <Link href="/verse-of-the-day" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Verse of the Day</Link>
               <Link href="/alphabet" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Alphabets</Link>
@@ -48,7 +50,7 @@ export default function Footer() {
               <a href="https://github.com/quantumnic/biblelens" target="_blank" rel="noopener noreferrer" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">GitHub ↗</a>
               <span className="block text-xs text-parchment-500">Open Source (MIT)</span>
               <span className="block text-xs text-parchment-500">KJV, ASV, WEB, VUL</span>
-              <span className="block text-xs text-parchment-500">6 Research APIs</span>
+              <span className="block text-xs text-parchment-500">9 Research APIs</span>
             </div>
           </div>
         </div>

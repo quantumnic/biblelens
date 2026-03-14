@@ -137,6 +137,12 @@ export default function Sidebar() {
             <Link href="/prophecies" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
               🔮 Prophecies
             </Link>
+            <Link href="/covenants" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              📜 Covenants
+            </Link>
+            <Link href="/sacrifices" className="text-center text-xs py-2 bg-parchment-800 hover:bg-gold-600 hover:text-parchment-950 text-parchment-300 rounded transition-colors">
+              🔥 Sacrifices
+            </Link>
           </div>
 
           {/* Book filter */}

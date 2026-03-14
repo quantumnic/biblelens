@@ -290,7 +290,44 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex, doaj, internetarchive, europepmc' }, { status: 400 });
+  if (source === 'googlebooks') {
+    try {
+      const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=${limit}&printType=books&orderBy=relevance`;
+      const res = await fetch(url, { next: { revalidate: 3600 } });
+
+      if (!res.ok) {
+        return NextResponse.json({ error: 'Google Books API error', status: res.status }, { status: 502 });
+      }
+
+      const data = await res.json();
+      const results = (data.items || []).map((item: any) => {
+        const info = item.volumeInfo || {};
+        return {
+          id: item.id,
+          title: info.title || '',
+          authors: info.authors || [],
+          year: info.publishedDate ? info.publishedDate.slice(0, 4) : null,
+          description: (info.description || '').slice(0, 400),
+          pages: info.pageCount || null,
+          categories: (info.categories || []).slice(0, 5),
+          isbn: info.industryIdentifiers?.find((i: any) => i.type === 'ISBN_13')?.identifier || info.industryIdentifiers?.[0]?.identifier || null,
+          thumbnail: info.imageLinks?.thumbnail || null,
+          url: info.infoLink || `https://books.google.com/books?id=${item.id}`,
+          averageRating: info.averageRating || null,
+        };
+      });
+
+      return NextResponse.json({
+        source: 'googlebooks',
+        results,
+        total: data.totalItems || 0,
+      });
+    } catch (e: any) {
+      return NextResponse.json({ error: 'Failed to query Google Books', details: e.message }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex, doaj, internetarchive, europepmc, googlebooks' }, { status: 400 });
   } catch (error) {
     return handleApiError(error);
   }
