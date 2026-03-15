@@ -56,7 +56,7 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
   const [wikiResults, setWikiResults] = useState<any[]>([]);
   const [perseusResults, setPerseusResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'ai' | 'scholar' | 'pubmed' | 'books' | 'crossref' | 'openalex' | 'archive' | 'europepmc' | 'googlebooks' | 'core' | 'wiki' | 'perseus' | 'resources'>('ai');
+  const [activeTab, setActiveTab] = useState<'ai' | 'scholar' | 'pubmed' | 'books' | 'crossref' | 'openalex' | 'archive' | 'europepmc' | 'googlebooks' | 'core' | 'wiki' | 'perseus' | 'wikidata' | 'sacredtexts' | 'resources'>('ai');
 
   const bookInfo = getBookById(book);
   const bookName = bookInfo?.name || '';
@@ -247,7 +247,7 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     <div className="space-y-3">
       {/* Tab bar */}
       <div className="flex gap-1 bg-parchment-800 rounded-lg p-1 overflow-x-auto">
-        {([['ai', '🤖 AI'], ['scholar', '🎓 Scholar'], ['pubmed', '🏥 PubMed'], ['books', '📚 Books'], ['googlebooks', '📖 Google'], ['crossref', '🔗 CrossRef'], ['openalex', '📊 OpenAlex'], ['archive', '🏛️ Archive'], ['europepmc', '🇪🇺 EuroPMC'], ['core', '🔬 CORE'], ['wiki', '📘 Wiki'], ['perseus', '🏛️ Perseus'], ['resources', '📌 Links']] as const).map(([key, label]) => (
+        {([['ai', '🤖 AI'], ['scholar', '🎓 Scholar'], ['pubmed', '🏥 PubMed'], ['books', '📚 Books'], ['googlebooks', '📖 Google'], ['crossref', '🔗 CrossRef'], ['openalex', '📊 OpenAlex'], ['archive', '🏛️ Archive'], ['europepmc', '🇪🇺 EuroPMC'], ['core', '🔬 CORE'], ['wiki', '📘 Wiki'], ['perseus', '🏛️ Perseus'], ['wikidata', '🔗 Wikidata'], ['sacredtexts', '📜 Sacred'], ['resources', '📌 Links']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
@@ -596,6 +596,16 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
         </div>
       )}
 
+      {/* Wikidata Tab */}
+      {activeTab === 'wikidata' && (
+        <WikidataTab query={searchQuery} />
+      )}
+
+      {/* Sacred Texts Tab */}
+      {activeTab === 'sacredtexts' && (
+        <SacredTextsTab query={searchQuery} />
+      )}
+
       {/* Resources Tab */}
       {activeTab === 'resources' && (
         <div className="space-y-2 max-h-[50vh] overflow-y-auto">
@@ -617,6 +627,67 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function WikidataTab({ query }: { query: string }) {
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!query) return;
+    setLoading(true);
+    fetch(`/api/research?q=${encodeURIComponent(query)}&source=wikidata&limit=8`)
+      .then(r => r.json())
+      .then(d => { setResults(d.results || []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [query]);
+
+  return (
+    <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+      <p className="text-xs text-parchment-500 mb-2">Structured knowledge from <strong className="text-gold-400">Wikidata</strong> — biblical persons, places, and concepts</p>
+      {loading && <p className="text-sm text-parchment-500 animate-pulse">Searching Wikidata...</p>}
+      {results.map((item: any, i: number) => (
+        <a key={i} href={item.url} target="_blank" rel="noopener noreferrer"
+           className="block p-3 rounded-lg bg-parchment-800 hover:bg-parchment-700 transition-colors">
+          <h4 className="text-sm text-parchment-200 font-medium">{item.title} <span className="text-parchment-600 text-xs">({item.id})</span></h4>
+          {item.description && <p className="text-xs text-parchment-500 mt-1">{item.description}</p>}
+        </a>
+      ))}
+      {!loading && results.length === 0 && <p className="text-sm text-parchment-500">No results found.</p>}
+    </div>
+  );
+}
+
+function SacredTextsTab({ query }: { query: string }) {
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!query) return;
+    setLoading(true);
+    fetch(`/api/research?q=${encodeURIComponent(query)}&source=sacredtexts`)
+      .then(r => r.json())
+      .then(d => { setResults(d.results || []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [query]);
+
+  return (
+    <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+      <p className="text-xs text-parchment-500 mb-2">Browse <strong className="text-gold-400">Internet Sacred Text Archive</strong> — public-domain religious texts</p>
+      {loading && <p className="text-sm text-parchment-500 animate-pulse">Loading...</p>}
+      {results.map((item: any, i: number) => (
+        <a key={i} href={item.url} target="_blank" rel="noopener noreferrer"
+           className="block p-3 rounded-lg bg-parchment-800 hover:bg-parchment-700 transition-colors">
+          <div className="flex items-center gap-2">
+            <span className="text-xs px-2 py-0.5 rounded bg-gold-600/20 text-gold-400">{item.type}</span>
+            <h4 className="text-sm text-parchment-200 font-medium">{item.title}</h4>
+          </div>
+          {item.description && <p className="text-xs text-parchment-500 mt-1">{item.description}</p>}
+        </a>
+      ))}
+      {!loading && results.length === 0 && <p className="text-sm text-parchment-500">No results found.</p>}
     </div>
   );
 }

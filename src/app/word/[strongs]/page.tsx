@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getDb } from '@/lib/db';
 import { getBookById } from '@/lib/bible-books';
 import { langEmoji, langLabel } from '@/lib/provenance';
+import WordRelationships from '@/components/WordRelationships';
 
 interface Props {
   params: { strongs: string };
@@ -166,6 +167,11 @@ export default function WordPage({ params }: Props) {
             </div>
           );
         })()}
+
+        {/* Word Relationships */}
+        <div className="mb-8">
+          <WordRelationships strongsId={params.strongs} />
+        </div>
 
         {/* Browse All */}
         <div>

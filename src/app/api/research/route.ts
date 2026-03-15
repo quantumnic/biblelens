@@ -530,9 +530,82 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex, doaj, internetarchive, europepmc, googlebooks, philpapers, jstor, core, wikipedia, perseus' }, { status: 400 });
+  if (source === 'wikidata') {
+    try {
+      // Search Wikidata for biblical entities
+      const url = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(query)}&language=en&limit=${limit}&format=json`;
+      const res = await fetch(url, {
+        headers: { 'Accept': 'application/json' },
+        next: { revalidate: 3600 },
+      });
+
+      if (!res.ok) {
+        return NextResponse.json({ error: 'Wikidata API error', status: res.status }, { status: 502 });
+      }
+
+      const data = await res.json();
+      const results = (data.search || []).map((item: any) => ({
+        id: item.id,
+        title: item.label,
+        description: item.description || '',
+        url: item.concepturi,
+      }));
+
+      return NextResponse.json({
+        source: 'wikidata',
+        results,
+        total: results.length,
+        note: 'Wikidata — structured knowledge base for biblical persons, places, and concepts.',
+      });
+    } catch (e: any) {
+      return NextResponse.json({ error: 'Failed to query Wikidata', details: e.message }, { status: 500 });
+    }
+  }
+
+  if (source === 'sacredtexts') {
+    try {
+      // Internet Sacred Texts Archive — build curated search links
+      const baseUrl = 'https://www.sacred-texts.com';
+      const results = [
+        {
+          title: `Bible: "${query}"`,
+          type: 'primary',
+          url: `${baseUrl}/bib/kjv/index.htm`,
+          description: 'King James Version at the Internet Sacred Text Archive.',
+        },
+        {
+          title: `Apocrypha: "${query}"`,
+          type: 'primary',
+          url: `${baseUrl}/bib/apo/index.htm`,
+          description: 'Deuterocanonical / Apocryphal texts — Wisdom of Solomon, Sirach, Maccabees, etc.',
+        },
+        {
+          title: `Church Fathers: "${query}"`,
+          type: 'secondary',
+          url: `${baseUrl}/chr/index.htm`,
+          description: 'Early Christian writings — patristic texts, creeds, and church history.',
+        },
+        {
+          title: `Jewish Texts: "${query}"`,
+          type: 'secondary',
+          url: `${baseUrl}/jud/index.htm`,
+          description: 'Jewish sacred texts — Talmud, Midrash, Kabbalah, and more.',
+        },
+      ];
+
+      return NextResponse.json({
+        source: 'sacredtexts',
+        results,
+        total: results.length,
+        note: 'Internet Sacred Text Archive — encyclopedic collection of public-domain religious texts.',
+      });
+    } catch (e: any) {
+      return NextResponse.json({ error: 'Failed to query Sacred Texts', details: e.message }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex, doaj, internetarchive, europepmc, googlebooks, philpapers, jstor, core, wikipedia, perseus, wikidata, sacredtexts' }, { status: 400 });
   } catch (error) {
     return handleApiError(error);
   }
 }
-// NOTE: this gets appended; need to insert before final return

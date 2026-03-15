@@ -361,6 +361,51 @@ export default function AnalyticsCharts({ topWords, sentimentData, bookStats, ti
           })()}
         </div>
       </section>
+
+      {/* Estimated Reading Time */}
+      <section className="bg-parchment-900 border border-parchment-800 rounded-xl p-5">
+        <h3 className="text-lg font-semibold text-parchment-200 mb-4 font-serif">⏱️ Estimated Reading Time</h3>
+        <p className="text-xs text-parchment-500 mb-3">At ~200 words per minute. Longest books shown first.</p>
+        <div className="space-y-2">
+          {(() => {
+            const WORDS_PER_MINUTE = 200;
+            const readingTimes = bookStats
+              .filter(b => b.chars > 0)
+              .map(b => {
+                const estWords = Math.round(b.chars / 5);
+                const minutes = Math.ceil(estWords / WORDS_PER_MINUTE);
+                return { name: b.name, minutes, testament: b.testament };
+              })
+              .sort((a, b) => b.minutes - a.minutes);
+            const maxMin = readingTimes[0]?.minutes || 1;
+            const totalMin = readingTimes.reduce((s, r) => s + r.minutes, 0);
+            return (
+              <>
+                <div className="text-center mb-4 p-3 bg-parchment-800 rounded-lg">
+                  <p className="text-2xl font-bold text-gold-400">{Math.floor(totalMin / 60)}h {totalMin % 60}m</p>
+                  <p className="text-xs text-parchment-500">Total Bible reading time</p>
+                </div>
+                {readingTimes.slice(0, 15).map(r => (
+                  <div key={r.name} className="flex items-center gap-3">
+                    <span className={`text-xs font-medium w-24 text-right ${r.testament === 'OT' ? 'text-amber-400' : 'text-blue-400'}`}>
+                      {r.name}
+                    </span>
+                    <div className="flex-1 h-4 bg-parchment-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-gold-600 to-gold-400 rounded-full transition-all"
+                        style={{ width: `${(r.minutes / maxMin) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-parchment-400 w-12 text-right">
+                      {r.minutes >= 60 ? `${Math.floor(r.minutes / 60)}h${r.minutes % 60}m` : `${r.minutes}m`}
+                    </span>
+                  </div>
+                ))}
+              </>
+            );
+          })()}
+        </div>
+      </section>
     </div>
   );
 }
