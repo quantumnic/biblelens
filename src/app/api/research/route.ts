@@ -476,7 +476,61 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex, doaj, internetarchive, europepmc, googlebooks, philpapers, jstor, core, wikipedia' }, { status: 400 });
+  if (source === 'perseus') {
+    try {
+      // Perseus Digital Library — search Greek/Latin texts and lexicon entries
+      const url = `https://www.perseus.tufts.edu/hopper/searchresults?q=${encodeURIComponent(query)}&target=en&collections=Perseus:collection:Greco-Roman&collections=Perseus:collection:Arabic&collections=Perseus:collection:Germanic&collections=Perseus:collection:cwar&collections=Perseus:collection:Renaissance`;
+      const res = await fetch(url, {
+        headers: { 'Accept': 'text/html', 'User-Agent': 'BibleLens/1.0' },
+        next: { revalidate: 3600 },
+      });
+
+      if (!res.ok) {
+        return NextResponse.json({
+          source: 'perseus',
+          results: [],
+          total: 0,
+          note: 'Perseus Digital Library search unavailable; try openlibrary or wikipedia.',
+        });
+      }
+
+      // Since Perseus returns HTML, provide curated links for biblical Greek/Latin terms
+      const greekLexiconUrl = `https://www.perseus.tufts.edu/hopper/resolveform?type=exact&lookup=${encodeURIComponent(query)}&lang=greek`;
+      const latinLexiconUrl = `https://www.perseus.tufts.edu/hopper/resolveform?type=exact&lookup=${encodeURIComponent(query)}&lang=la`;
+
+      const results = [
+        {
+          title: `Perseus Search: "${query}"`,
+          type: 'search',
+          url: `https://www.perseus.tufts.edu/hopper/searchresults?q=${encodeURIComponent(query)}`,
+          description: 'Full-text search across the Perseus Digital Library collection.',
+        },
+        {
+          title: `Greek Lexicon: "${query}"`,
+          type: 'lexicon',
+          url: greekLexiconUrl,
+          description: 'Look up in the Liddell-Scott-Jones Greek-English Lexicon.',
+        },
+        {
+          title: `Latin Lexicon: "${query}"`,
+          type: 'lexicon',
+          url: latinLexiconUrl,
+          description: 'Look up in Lewis & Short Latin Dictionary.',
+        },
+      ];
+
+      return NextResponse.json({
+        source: 'perseus',
+        results,
+        total: results.length,
+        note: 'Perseus Digital Library — primary sources in Greek and Latin with lexicon tools.',
+      });
+    } catch (e: any) {
+      return NextResponse.json({ error: 'Failed to query Perseus', details: e.message }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex, doaj, internetarchive, europepmc, googlebooks, philpapers, jstor, core, wikipedia, perseus' }, { status: 400 });
   } catch (error) {
     return handleApiError(error);
   }

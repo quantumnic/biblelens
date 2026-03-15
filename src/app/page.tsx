@@ -235,6 +235,21 @@ export default function Home() {
             <p className="text-sm text-parchment-200 mt-2 font-semibold">Genealogies</p>
             <p className="text-xs text-parchment-500 mt-0.5">Biblical family trees</p>
           </Link>
+          <Link href="/ten-commandments" className="p-4 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all text-center group">
+            <span className="text-2xl group-hover:scale-110 inline-block transition-transform">⛰️</span>
+            <p className="text-sm text-parchment-200 mt-2 font-semibold">Ten Commandments</p>
+            <p className="text-xs text-parchment-500 mt-0.5">Decalogue with Hebrew roots</p>
+          </Link>
+          <Link href="/fruit-of-spirit" className="p-4 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all text-center group">
+            <span className="text-2xl group-hover:scale-110 inline-block transition-transform">🍇</span>
+            <p className="text-sm text-parchment-200 mt-2 font-semibold">Fruit of the Spirit</p>
+            <p className="text-xs text-parchment-500 mt-0.5">Galatians 5:22–23 deep dive</p>
+          </Link>
+          <Link href="/armor-of-god" className="p-4 rounded-xl bg-parchment-900 border border-parchment-800 hover:border-gold-500/30 transition-all text-center group">
+            <span className="text-2xl group-hover:scale-110 inline-block transition-transform">⚔️</span>
+            <p className="text-sm text-parchment-200 mt-2 font-semibold">Armor of God</p>
+            <p className="text-xs text-parchment-500 mt-0.5">Spiritual warfare equipment</p>
+          </Link>
         </div>
 
         {/* Popular Passages */}

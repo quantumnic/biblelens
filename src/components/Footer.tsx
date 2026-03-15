@@ -27,6 +27,22 @@ export default function Footer() {
             </div>
           </div>
           <div>
+            <h3 className="text-xs font-semibold text-gold-500 uppercase tracking-wider mb-3">Theology</h3>
+            <div className="space-y-1.5">
+              <Link href="/ten-commandments" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Ten Commandments</Link>
+              <Link href="/beatitudes" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Beatitudes</Link>
+              <Link href="/fruit-of-spirit" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Fruit of the Spirit</Link>
+              <Link href="/armor-of-god" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Armor of God</Link>
+              <Link href="/parables" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Parables of Jesus</Link>
+              <Link href="/typology" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Biblical Typology</Link>
+              <Link href="/prophecies" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Prophecy Tracker</Link>
+              <Link href="/covenants" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Biblical Covenants</Link>
+              <Link href="/sacrifices" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Levitical Sacrifices</Link>
+              <Link href="/miracles" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Miracles</Link>
+              <Link href="/prayers" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Prayers</Link>
+            </div>
+          </div>
+          <div>
             <h3 className="text-xs font-semibold text-gold-500 uppercase tracking-wider mb-3">Explore</h3>
             <div className="space-y-1.5">
               <Link href="/analytics" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Analytics</Link>
@@ -35,25 +51,26 @@ export default function Footer() {
               <Link href="/figures" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Figures of Speech</Link>
               <Link href="/names-of-god" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Names of God</Link>
               <Link href="/persons" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Key Persons</Link>
-              <Link href="/parables" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Parables of Jesus</Link>
-              <Link href="/typology" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Biblical Typology</Link>
-              <Link href="/covenants" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Biblical Covenants</Link>
-              <Link href="/sacrifices" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Levitical Sacrifices</Link>
               <Link href="/geography" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Geography</Link>
               <Link href="/verse-of-the-day" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Verse of the Day</Link>
               <Link href="/alphabet" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Alphabets</Link>
               <Link href="/genealogy" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Genealogies</Link>
             </div>
           </div>
-          <div>
-            <h3 className="text-xs font-semibold text-gold-500 uppercase tracking-wider mb-3">About</h3>
-            <div className="space-y-1.5">
-              <a href="https://github.com/quantumnic/biblelens" target="_blank" rel="noopener noreferrer" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">GitHub ↗</a>
-              <span className="block text-xs text-parchment-500">Open Source (MIT)</span>
-              <span className="block text-xs text-parchment-500">KJV, ASV, WEB, VUL</span>
-              <span className="block text-xs text-parchment-500">13 Research APIs</span>
-            </div>
-          </div>
+        </div>
+        <div className="flex flex-wrap justify-center gap-4 mb-6 text-xs">
+          <a href="https://github.com/quantumnic/biblelens" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-parchment-900 border border-parchment-800 rounded-full text-parchment-400 hover:text-gold-400 hover:border-gold-500/30 transition-all">
+            ⭐ GitHub
+          </a>
+          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-parchment-900 border border-parchment-800 rounded-full text-parchment-500">
+            📜 Open Source (MIT)
+          </span>
+          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-parchment-900 border border-parchment-800 rounded-full text-parchment-500">
+            🌐 KJV · ASV · WEB · VUL
+          </span>
+          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-parchment-900 border border-parchment-800 rounded-full text-parchment-500">
+            🔬 14 Research APIs
+          </span>
         </div>
         <div className="text-center text-xs text-parchment-600 pt-5 border-t border-parchment-800/50">
           <p className="flex items-center justify-center gap-2">

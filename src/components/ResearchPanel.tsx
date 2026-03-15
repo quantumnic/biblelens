@@ -54,8 +54,9 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
   const [googlebooks, setGooglebooks] = useState<any[]>([]);
   const [coreResults, setCoreResults] = useState<any[]>([]);
   const [wikiResults, setWikiResults] = useState<any[]>([]);
+  const [perseusResults, setPerseusResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'ai' | 'scholar' | 'pubmed' | 'books' | 'crossref' | 'openalex' | 'archive' | 'europepmc' | 'googlebooks' | 'core' | 'wiki' | 'resources'>('ai');
+  const [activeTab, setActiveTab] = useState<'ai' | 'scholar' | 'pubmed' | 'books' | 'crossref' | 'openalex' | 'archive' | 'europepmc' | 'googlebooks' | 'core' | 'wiki' | 'perseus' | 'resources'>('ai');
 
   const bookInfo = getBookById(book);
   const bookName = bookInfo?.name || '';
@@ -172,6 +173,17 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     setLoading(false);
   };
 
+  const fetchPerseus = async () => {
+    if (perseusResults.length > 0) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/research?q=${encodeURIComponent(searchQuery)}&source=perseus&limit=5`);
+      const data = await res.json();
+      setPerseusResults(data.results || []);
+    } catch { /* ignore */ }
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (activeTab === 'scholar') fetchScholar();
     if (activeTab === 'pubmed') fetchPubMed();
@@ -183,6 +195,7 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     if (activeTab === 'googlebooks') fetchGoogleBooks();
     if (activeTab === 'core') fetchCore();
     if (activeTab === 'wiki') fetchWiki();
+    if (activeTab === 'perseus') fetchPerseus();
   }, [activeTab]);
 
   // AI research queries
@@ -234,7 +247,7 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     <div className="space-y-3">
       {/* Tab bar */}
       <div className="flex gap-1 bg-parchment-800 rounded-lg p-1 overflow-x-auto">
-        {([['ai', '🤖 AI'], ['scholar', '🎓 Scholar'], ['pubmed', '🏥 PubMed'], ['books', '📚 Books'], ['googlebooks', '📖 Google'], ['crossref', '🔗 CrossRef'], ['openalex', '📊 OpenAlex'], ['archive', '🏛️ Archive'], ['europepmc', '🇪🇺 EuroPMC'], ['core', '🔬 CORE'], ['wiki', '📘 Wiki'], ['resources', '📌 Links']] as const).map(([key, label]) => (
+        {([['ai', '🤖 AI'], ['scholar', '🎓 Scholar'], ['pubmed', '🏥 PubMed'], ['books', '📚 Books'], ['googlebooks', '📖 Google'], ['crossref', '🔗 CrossRef'], ['openalex', '📊 OpenAlex'], ['archive', '🏛️ Archive'], ['europepmc', '🇪🇺 EuroPMC'], ['core', '🔬 CORE'], ['wiki', '📘 Wiki'], ['perseus', '🏛️ Perseus'], ['resources', '📌 Links']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
@@ -561,6 +574,25 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
             </a>
           ))}
           {!loading && wikiResults.length === 0 && <p className="text-sm text-parchment-500">No results found.</p>}
+        </div>
+      )}
+
+      {/* Perseus Tab */}
+      {activeTab === 'perseus' && (
+        <div className="space-y-2">
+          <p className="text-xs text-parchment-500 mb-2">Classical texts from <strong className="text-gold-400">Perseus Digital Library</strong> — Greek &amp; Latin primary sources with lexicon tools</p>
+          {loading && <p className="text-sm text-parchment-500 animate-pulse">Loading Perseus links...</p>}
+          {perseusResults.map((item: any, i: number) => (
+            <a key={i} href={item.url} target="_blank" rel="noopener noreferrer"
+              className="block p-3 bg-parchment-800 rounded-lg hover:bg-parchment-700 transition-colors group">
+              <p className="text-sm text-parchment-200 font-medium group-hover:text-gold-400 mb-1">{item.title}</p>
+              <div className="flex items-center gap-2 text-xs text-parchment-500">
+                <span className="px-1.5 py-0.5 bg-parchment-700 rounded">{item.type}</span>
+              </div>
+              {item.description && <p className="text-xs text-parchment-500 mt-1">{item.description}</p>}
+            </a>
+          ))}
+          {!loading && perseusResults.length === 0 && <p className="text-sm text-parchment-500">No results found.</p>}
         </div>
       )}
 
