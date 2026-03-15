@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getDb } from '@/lib/db';
 import { getBookById, BIBLE_BOOKS } from '@/lib/bible-books';
 import AnalyticsCharts from '@/components/AnalyticsCharts';
+import AnalyticsBookSelector from '@/components/AnalyticsBookSelector';
 
 export const dynamic = 'force-dynamic';
 
@@ -100,16 +101,7 @@ export default function AnalyticsPage({ searchParams }: Props) {
 
         <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
           <h1 className="text-3xl font-bold font-serif text-parchment-100">📊 Analytics Dashboard</h1>
-          <select
-            defaultValue={bookId}
-            onChange={() => {}}
-            className="bg-parchment-800 text-parchment-200 rounded-lg px-3 py-2 text-sm border border-parchment-700"
-          >
-            <option value="0">All Books</option>
-            {BIBLE_BOOKS.map(b => (
-              <option key={b.id} value={b.id}>{b.name}</option>
-            ))}
-          </select>
+          <AnalyticsBookSelector bookId={bookId} />
         </div>
 
         {/* Pass data to client component for charts */}

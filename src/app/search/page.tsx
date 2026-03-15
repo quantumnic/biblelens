@@ -75,20 +75,20 @@ export default async function SearchPage({ searchParams }: Props) {
               />
             </div>
             <div>
-              <select name="testament" defaultValue={searchParams.testament || ''}
+              <select name="testament"
                 className="bg-parchment-800 text-parchment-200 rounded-lg px-3 py-3 text-sm border border-parchment-700">
-                <option value="">All</option>
-                <option value="OT">Old Testament</option>
-                <option value="NT">New Testament</option>
+                <option value="" selected={(searchParams.testament || '') === ''}>All</option>
+                <option value="OT" selected={searchParams.testament === 'OT'}>Old Testament</option>
+                <option value="NT" selected={searchParams.testament === 'NT'}>New Testament</option>
               </select>
             </div>
             <div>
-              <select name="translation" defaultValue={searchParams.translation || 'KJV'}
+              <select name="translation"
                 className="bg-parchment-800 text-parchment-200 rounded-lg px-3 py-3 text-sm border border-parchment-700">
-                <option value="KJV">KJV</option>
-                <option value="ASV">ASV</option>
-                <option value="WEB">WEB</option>
-                <option value="YLT">YLT</option>
+                <option value="KJV" selected={!searchParams.translation || searchParams.translation === 'KJV'}>KJV</option>
+                <option value="ASV" selected={searchParams.translation === 'ASV'}>ASV</option>
+                <option value="WEB" selected={searchParams.translation === 'WEB'}>WEB</option>
+                <option value="YLT" selected={searchParams.translation === 'YLT'}>YLT</option>
               </select>
             </div>
             <button type="submit" className="px-6 py-3 bg-gold-600 text-parchment-950 rounded-xl font-semibold hover:bg-gold-500 transition-colors">
