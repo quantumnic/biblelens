@@ -3,6 +3,7 @@ import './globals.css';
 import ScrollToTop from '@/components/ScrollToTop';
 import Footer from '@/components/Footer';
 import ReadingProgress from '@/components/ReadingProgress';
+import SearchModal from '@/components/SearchModal';
 
 export const metadata: Metadata = {
   title: 'BibleLens — Analytical Bible Study Tool',
@@ -35,6 +36,7 @@ export default function RootLayout({
         </div>
         <Footer />
         <ScrollToTop />
+        <SearchModal />
       </body>
     </html>
   );

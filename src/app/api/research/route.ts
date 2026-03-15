@@ -444,7 +444,39 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex, doaj, internetarchive, europepmc, googlebooks, philpapers, jstor, core' }, { status: 400 });
+  if (source === 'wikipedia') {
+    try {
+      const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=${limit}&format=json&srprop=snippet|titlesnippet|timestamp|wordcount|size`;
+      const res = await fetch(url, {
+        headers: { 'Accept': 'application/json', 'User-Agent': 'BibleLens/1.0' },
+        next: { revalidate: 3600 },
+      });
+
+      if (!res.ok) {
+        return NextResponse.json({ error: 'Wikipedia API error', status: res.status }, { status: 502 });
+      }
+
+      const data = await res.json();
+      const items = data.query?.search || [];
+      const results = items.map((item: any) => ({
+        title: item.title || '',
+        snippet: (item.snippet || '').replace(/<[^>]*>/g, '').slice(0, 400),
+        wordcount: item.wordcount || 0,
+        timestamp: item.timestamp || null,
+        url: `https://en.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/ /g, '_'))}`,
+      }));
+
+      return NextResponse.json({
+        source: 'wikipedia',
+        results,
+        total: data.query?.searchinfo?.totalhits || results.length,
+      });
+    } catch (e: any) {
+      return NextResponse.json({ error: 'Failed to query Wikipedia', details: e.message }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ error: 'Unknown source. Use: semanticscholar, pubmed, openlibrary, crossref, openalex, doaj, internetarchive, europepmc, googlebooks, philpapers, jstor, core, wikipedia' }, { status: 400 });
   } catch (error) {
     return handleApiError(error);
   }

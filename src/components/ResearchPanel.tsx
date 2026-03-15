@@ -53,8 +53,9 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
   const [europepmc, setEuropepmc] = useState<any[]>([]);
   const [googlebooks, setGooglebooks] = useState<any[]>([]);
   const [coreResults, setCoreResults] = useState<any[]>([]);
+  const [wikiResults, setWikiResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'ai' | 'scholar' | 'pubmed' | 'books' | 'crossref' | 'openalex' | 'archive' | 'europepmc' | 'googlebooks' | 'core' | 'resources'>('ai');
+  const [activeTab, setActiveTab] = useState<'ai' | 'scholar' | 'pubmed' | 'books' | 'crossref' | 'openalex' | 'archive' | 'europepmc' | 'googlebooks' | 'core' | 'wiki' | 'resources'>('ai');
 
   const bookInfo = getBookById(book);
   const bookName = bookInfo?.name || '';
@@ -160,6 +161,17 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     setLoading(false);
   };
 
+  const fetchWiki = async () => {
+    if (wikiResults.length > 0) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/research?q=${encodeURIComponent(searchQuery + ' Bible')}&source=wikipedia&limit=8`);
+      const data = await res.json();
+      setWikiResults(data.results || []);
+    } catch { /* ignore */ }
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (activeTab === 'scholar') fetchScholar();
     if (activeTab === 'pubmed') fetchPubMed();
@@ -170,6 +182,7 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     if (activeTab === 'europepmc') fetchEuropePMC();
     if (activeTab === 'googlebooks') fetchGoogleBooks();
     if (activeTab === 'core') fetchCore();
+    if (activeTab === 'wiki') fetchWiki();
   }, [activeTab]);
 
   // AI research queries
@@ -221,7 +234,7 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     <div className="space-y-3">
       {/* Tab bar */}
       <div className="flex gap-1 bg-parchment-800 rounded-lg p-1 overflow-x-auto">
-        {([['ai', '🤖 AI'], ['scholar', '🎓 Scholar'], ['pubmed', '🏥 PubMed'], ['books', '📚 Books'], ['googlebooks', '📖 Google'], ['crossref', '🔗 CrossRef'], ['openalex', '📊 OpenAlex'], ['archive', '🏛️ Archive'], ['europepmc', '🇪🇺 EuroPMC'], ['core', '🔬 CORE'], ['resources', '📌 Links']] as const).map(([key, label]) => (
+        {([['ai', '🤖 AI'], ['scholar', '🎓 Scholar'], ['pubmed', '🏥 PubMed'], ['books', '📚 Books'], ['googlebooks', '📖 Google'], ['crossref', '🔗 CrossRef'], ['openalex', '📊 OpenAlex'], ['archive', '🏛️ Archive'], ['europepmc', '🇪🇺 EuroPMC'], ['core', '🔬 CORE'], ['wiki', '📘 Wiki'], ['resources', '📌 Links']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
@@ -529,6 +542,25 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
             </a>
           ))}
           {!loading && coreResults.length === 0 && <p className="text-sm text-parchment-500">No results found.</p>}
+        </div>
+      )}
+
+      {/* Wikipedia Tab */}
+      {activeTab === 'wiki' && (
+        <div className="space-y-2">
+          <p className="text-xs text-parchment-500 mb-2">Encyclopedia articles from <strong className="text-gold-400">Wikipedia</strong> — general reference and context</p>
+          {loading && <p className="text-sm text-parchment-500 animate-pulse">Searching Wikipedia...</p>}
+          {wikiResults.map((item: any, i: number) => (
+            <a key={i} href={item.url} target="_blank" rel="noopener noreferrer"
+              className="block p-3 bg-parchment-800 rounded-lg hover:bg-parchment-700 transition-colors group">
+              <p className="text-sm text-parchment-200 font-medium group-hover:text-gold-400 mb-1">{item.title}</p>
+              <div className="flex items-center gap-2 text-xs text-parchment-500 flex-wrap">
+                {item.wordcount && <span>{item.wordcount.toLocaleString()} words</span>}
+              </div>
+              {item.snippet && <p className="text-xs text-parchment-500 mt-1 line-clamp-2">{item.snippet}</p>}
+            </a>
+          ))}
+          {!loading && wikiResults.length === 0 && <p className="text-sm text-parchment-500">No results found.</p>}
         </div>
       )}
 

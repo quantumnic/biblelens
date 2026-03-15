@@ -45,6 +45,7 @@ const NAV_SECTIONS: NavSection[] = [
       { href: '/sacrifices', icon: '🔥', label: 'Sacrifices' },
       { href: '/geography', icon: '🗺️', label: 'Geography' },
       { href: '/alphabet', icon: '🔤', label: 'Alphabet' },
+      { href: '/genealogy', icon: '🌳', label: 'Genealogy' },
     ],
   },
   {

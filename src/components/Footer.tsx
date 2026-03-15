@@ -42,6 +42,7 @@ export default function Footer() {
               <Link href="/geography" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Geography</Link>
               <Link href="/verse-of-the-day" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Verse of the Day</Link>
               <Link href="/alphabet" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Alphabets</Link>
+              <Link href="/genealogy" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Genealogies</Link>
             </div>
           </div>
           <div>
@@ -50,7 +51,7 @@ export default function Footer() {
               <a href="https://github.com/quantumnic/biblelens" target="_blank" rel="noopener noreferrer" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">GitHub ↗</a>
               <span className="block text-xs text-parchment-500">Open Source (MIT)</span>
               <span className="block text-xs text-parchment-500">KJV, ASV, WEB, VUL</span>
-              <span className="block text-xs text-parchment-500">9 Research APIs</span>
+              <span className="block text-xs text-parchment-500">13 Research APIs</span>
             </div>
           </div>
         </div>
