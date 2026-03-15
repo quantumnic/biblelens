@@ -16,6 +16,7 @@ import { EXTENDED_STRONGS_V12, EXTENDED_WORD_STRONGS_V12 } from './strongs-exten
 import { EXTENDED_STRONGS_V13, EXTENDED_WORD_STRONGS_V13 } from './strongs-extended-v13';
 import { EXTENDED_STRONGS_V14, EXTENDED_WORD_STRONGS_V14 } from './strongs-extended-v14';
 import { EXTENDED_STRONGS_V15, EXTENDED_WORD_STRONGS_V15 } from './strongs-extended-v15';
+import { EXTENDED_STRONGS_V16, EXTENDED_WORD_STRONGS_V16 } from './strongs-extended-v16';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DB_PATH = path.join(DATA_DIR, 'bible.db');
@@ -414,8 +415,9 @@ async function main() {
     for (const s of EXTENDED_STRONGS_V13) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
     for (const s of EXTENDED_STRONGS_V14) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
     for (const s of EXTENDED_STRONGS_V15) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
+    for (const s of EXTENDED_STRONGS_V16) insertStrong.run(s.id, s.original, s.transliteration, s.definition, s.language);
   })();
-  console.log(`Strong's concordance seeded: ${strongsData.length + extendedStrongs.length + EXTENDED_STRONGS_V2.length + EXTENDED_STRONGS_V3.length + EXTENDED_STRONGS_V4.length + EXTENDED_STRONGS_V5.length + EXTENDED_STRONGS_V6.length + EXTENDED_STRONGS_V7.length + EXTENDED_STRONGS_V8.length + EXTENDED_STRONGS_V9.length + EXTENDED_STRONGS_V10.length + EXTENDED_STRONGS_V11.length + EXTENDED_STRONGS_V12.length + EXTENDED_STRONGS_V13.length + EXTENDED_STRONGS_V14.length + EXTENDED_STRONGS_V15.length} entries.`);
+  console.log(`Strong's concordance seeded: ${strongsData.length + extendedStrongs.length + EXTENDED_STRONGS_V2.length + EXTENDED_STRONGS_V3.length + EXTENDED_STRONGS_V4.length + EXTENDED_STRONGS_V5.length + EXTENDED_STRONGS_V6.length + EXTENDED_STRONGS_V7.length + EXTENDED_STRONGS_V8.length + EXTENDED_STRONGS_V9.length + EXTENDED_STRONGS_V10.length + EXTENDED_STRONGS_V11.length + EXTENDED_STRONGS_V12.length + EXTENDED_STRONGS_V13.length + EXTENDED_STRONGS_V14.length + EXTENDED_STRONGS_V15.length + EXTENDED_STRONGS_V16.length} entries.`);
 
   // Word-strongs mappings
   const insertWordStrong = db.prepare('INSERT OR IGNORE INTO word_strongs (book, chapter, verse, word, strongs_id, position) VALUES (?, ?, ?, ?, ?, ?)');
@@ -488,6 +490,9 @@ async function main() {
       insertWordStrong.run(m.book, m.chapter, m.verse, m.word, m.strongs_id, 1);
     }
     for (const m of EXTENDED_WORD_STRONGS_V15) {
+      insertWordStrong.run(m.book, m.chapter, m.verse, m.word, m.strongs_id, 1);
+    }
+    for (const m of EXTENDED_WORD_STRONGS_V16) {
       insertWordStrong.run(m.book, m.chapter, m.verse, m.word, m.strongs_id, 1);
     }
   })();

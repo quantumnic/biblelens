@@ -241,6 +241,9 @@ export default function ResearchPanel({ book, chapter, verse }: { book: number; 
     { name: 'Codex Sinaiticus', url: 'https://codexsinaiticus.org/en/', icon: '📜', desc: '4th-century Greek manuscript (complete NT)' },
     { name: 'Textus Receptus', url: `https://www.textusreceptusbibles.com/`, icon: '📖', desc: 'Greek NT underlying the KJV' },
     { name: 'Bible Odyssey', url: `https://www.bibleodyssey.org/en/tools/search-results?q=${encodeURIComponent(bookName || '')}`, icon: '🗺️', desc: 'Society of Biblical Literature resources' },
+    { name: 'ATLA Religion DB', url: `https://www.atla.com/research-tool/?searchText=${encodeURIComponent(searchQuery + ' biblical')}`, icon: '📖', desc: 'Premier religion & theology index' },
+    { name: 'Bible Gateway', url: `https://www.biblegateway.com/passage/?search=${encodeURIComponent(ref)}&version=KJV,NIV,ESV`, icon: '🚪', desc: 'Multi-version comparison' },
+    { name: 'Kata Biblon', url: `https://en.katabiblon.com/us/index.php?text=LXX&book=${bookName?.replace(/ /g, '+')}`, icon: '📗', desc: 'Greek-English Septuagint (LXX)' },
   ];
 
   return (

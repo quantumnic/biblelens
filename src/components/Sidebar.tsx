@@ -36,6 +36,8 @@ const NAV_SECTIONS: NavSection[] = [
       { href: '/armor-of-god', icon: '⚔️', label: 'Armor of God' },
       { href: '/figures', icon: '🎭', label: 'Figures' },
       { href: '/doxologies', icon: '🎵', label: 'Doxologies' },
+      { href: '/lords-prayer', icon: '🙏', label: "Lord's Prayer" },
+      { href: '/themes', icon: '🎨', label: 'Themes' },
     ],
   },
   {

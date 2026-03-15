@@ -41,6 +41,8 @@ export default function Footer() {
               <Link href="/miracles" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Miracles</Link>
               <Link href="/prayers" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Prayers</Link>
               <Link href="/doxologies" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Doxologies &amp; Hymns</Link>
+              <Link href="/lords-prayer" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Lord&apos;s Prayer</Link>
+              <Link href="/themes" className="block text-xs text-parchment-400 hover:text-gold-400 transition-colors">Theological Themes</Link>
             </div>
           </div>
           <div>
@@ -70,7 +72,7 @@ export default function Footer() {
             🌐 KJV · ASV · WEB · VUL
           </span>
           <span className="flex items-center gap-1.5 px-3 py-1.5 bg-parchment-900 border border-parchment-800 rounded-full text-parchment-500">
-            🔬 16 Research APIs
+            🔬 19 Research Sources
           </span>
         </div>
         <div className="text-center text-xs text-parchment-600 pt-5 border-t border-parchment-800/50">
