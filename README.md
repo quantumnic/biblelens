@@ -2,6 +2,8 @@
 
 # 📖 BibleLens
 
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/redbasecap)
+
 ### The world's most powerful open-source Bible research platform.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-gold.svg)](LICENSE)
